@@ -1,0 +1,197 @@
+\documentclass[11pt]{article}
+
+% ---------------------------------------------------------------- packages ---
+\usepackage[margin=1in]{geometry}
+\usepackage{microtype}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{titlesec}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes.geometric,backgrounds,fit,calc}
+\usepackage[hidelinks]{hyperref}
+
+% ------------------------------------------------------------------ palette ---
+\definecolor{kailoink}{HTML}{16232B}
+\definecolor{kailoaccent}{HTML}{0B6E77}
+\definecolor{kailorule}{HTML}{C4CCD2}
+\definecolor{kailosoft}{HTML}{E8EEF0}
+\definecolor{kailowarn}{HTML}{A6521A}
+\definecolor{kailogood}{HTML}{2F6D4F}
+\definecolor{boxbg}{HTML}{F4F7F8}
+
+\hypersetup{colorlinks=true,linkcolor=kailoaccent,urlcolor=kailoaccent}
+
+% ---------------------------------------------------------------- headings ---
+\titleformat{\section}{\Large\bfseries\color{kailoink}}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\large\bfseries\color{kailoink}}{\thesubsection}{0.6em}{}
+\titleformat{\subsubsection}{\normalsize\bfseries\color{kailoaccent}}{}{0em}{}
+\titlespacing*{\section}{0pt}{1.6em}{0.7em}
+
+\setlist[itemize]{leftmargin=1.3em,itemsep=2pt,topsep=3pt}
+\setlist[enumerate]{leftmargin=1.5em,itemsep=2pt,topsep=3pt}
+
+% a light callout box
+\newcommand{\assess}[1]{%
+  \par\vspace{4pt}%
+  \noindent\colorbox{boxbg}{\parbox{\dimexpr\linewidth-2\fboxsep}{%
+  \small\textcolor{kailowarn}{\textbf{Assessment.}}\;#1}}\par\vspace{4pt}}
+
+\newcommand{\code}[1]{\texttt{\small #1}}
+
+% ================================================================== title ===
+\begin{document}
+\begin{center}
+  {\LARGE\bfseries\color{kailoink} Kailo Coaching Hub Audit}\\[6pt]
+  {\large\color{kailoaccent} Product review \& data-platform architecture}\\[10pt]
+  {\normalsize 21 August 2026}
+\end{center}
+\vspace{0.5em}
+\hrule height 1pt
+\vspace{1.2em}
+
+% --------------------------------------------------------------- framing ---
+\section*{Defining Product Goals}
+\addcontentsline{toc}{section}{Defining Product Goals}
+
+\begin{itemize}
+  \item \textbf{Team-native, coach-facing training platform.} The team is the
+    unit; the coach is the primary user.
+  \item \textbf{Stronger analytical tools and coach customization} than
+    TrainingPeaks or FinalSurge --- the analytics and the ability to tailor the
+    surface are the differentiators, not feature parity.
+  \item \textbf{A coach-determined path for athletes to interact} that
+    \emph{reduces} the need for athlete buy-in. The less work an athlete has to
+    do, the better the product: participation should be near-passive by default,
+    with the coach deciding how much the athlete is asked to do.
+\end{itemize}
+
+\subsection*{Technical Needs}
+\begin{itemize}
+  \item \textbf{Athlete objects with histories and attributes.} Each athlete
+    carries a history (race and training paces over time) \emph{and} a set of
+    learned attributes --- e.g.\ ``performs better on hilly courses,''
+    ``degrades more in rain / heat.'' These attributes are estimated from data,
+    they change as more data arrives, and the set will grow. The data platform
+    exists to populate and keep refreshing them.
+\end{itemize}
+
+\vspace{0.4em}
+\hrule height 0.4pt
+\vspace{0.6em}
+
+% ============================================================ 1. AUDIT ===
+\section{Product Audit}
+
+\subsection{Organization}
+
+The current coaching hub (desktop) is organized on two axes: a \textbf{thematic
+vertical axis} and a \textbf{temporal horizontal axis}. The vertical axis is a
+left pane on wide screens, moving to the top on narrow screens. None of its
+top-level labels are clickable. Its structure:
+
+\begin{center}
+\small
+\begin{tabular}{@{}p{0.30\linewidth} p{0.30\linewidth} p{0.30\linewidth}@{}}
+\toprule
+\textbf{Before Practice} & \textbf{After Practice} & \textbf{The Roster}\\
+\midrule
+Today & Session review & Week wall\\
+Tasks + Links & Inbox & Volume\\
+\quad Planner & & Athlete\\
+\quad Workout planner & & \quad Parameters\\
+\quad Pace cards & & \quad Results\\
+Share with the Team & & \quad Predictions\\
+\quad Athlete day & & \\
+\quad Team board & \textbf{Housekeeping} & \\
+\quad 1-on-1s & Operations & \\
+ & Data health & \\
+ & How this works & \\
+ & Setup & \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection{The landing page (\code{kailo.fit/hub}, ``Today'')}
+The landing page is a long stack of text widgets. Top widgets include
+\emph{``[N] uploaded yesterday,'' ``Available today,'' ``Data flags,'' ``Gone
+quiet,'' ``Need a look,''} and \emph{``Dew point at practice.''} Below these sit
+more text widgets: \emph{``Where your attention goes''} (activities flagged as
+abnormal --- average heart rate high on an easy run, distance longer than
+expected), a \emph{``Today's plan''} widget with a print option, and a practice
+conditions widget (\emph{``Conditions this afternoon''}).
+
+Specific notes:
+\begin{itemize}
+  \item \textbf{Keep high-quality, accessible print.} The plan's print option is
+    good and should stay easy to reach throughout.
+  \item \textbf{Conditions is buried and single-window.} ``Conditions this
+    afternoon'' sits too far down, does not currently populate, and only shows
+    the afternoon --- athletes running \emph{doubles} lose the morning window
+    entirely.
+  \item \textbf{No expand/collapse} on any widget, producing a very long page.
+\end{itemize}
+
+\assess{There is too much information, almost all of it text, with no visual
+hierarchy to separate what matters from what does not. Because this is the
+landing page, deep customization is essential --- and this critique of the
+landing page is the critique of the whole product.}
+
+\subsection{Proposed structure: five main tabs}
+
+Collapse the sprawl into five tabs.
+
+\begin{enumerate}
+  \item \textbf{Today} --- weather for \emph{four} windows: this morning, this
+    afternoon, next morning, next afternoon (fixing the doubles gap).
+  \item \textbf{Upcoming.}
+  \item \textbf{Athletes} --- see the athlete-page layout below.
+  \item \textbf{Recruiting.}
+  \item \textbf{Settings.}
+\end{enumerate}
+
+\subsubsection{The athlete page (three tiers, top to bottom)}
+\begin{description}[leftmargin=0em,style=nextline,itemsep=3pt]
+  \item[Identity (top, glanceable).] Name, gender, class, hometown, MileSplit
+    and Athletic.net links, and PRs.
+  \item[Secondary.] Attendance / training log, past and current injuries,
+    upcoming registered events (date, name, event), training paces.
+  \item[Advanced analytics (bottom).] The learned attribute models:
+    \begin{itemize}
+      \item \textbf{Hill Resilience} --- is the runner better on flat or hilly
+        courses? Built from course-elevation learning, MileSplit course
+        rankings, FloRatings A/B/C/D, TullyRunners speed ratings, joshm.dev's
+        Crystal Springs Pace Factor, and the golf-slope-rating analog.
+      \item \textbf{Weather Impact} --- how much adverse weather degrades this
+        runner. The constraint: exact per-race time is needed, and getting it at
+        scale from Athletic.net is not viable (see \S\ref{sec:platform}).
+      \item Additional analytical models as desired.
+    \end{itemize}
+\end{description}
+
+\subsection{Wording}
+
+Much of the copy reads as too cute, too artsy, or too AI-generated, and should
+be plainer. Examples:
+
+\begin{center}
+\small
+\begin{tabular}{@{}p{0.52\linewidth} p{0.42\linewidth}@{}}
+\toprule
+\textbf{Current} & \textbf{Plainer}\\
+\midrule
+``One line from an athlete at 3:47 is worth more than finding out at 4:10 in the
+parking lot.'' & Cut, or state the actual point.\\[4pt]
+``Where your attention goes'' --- ``ranked, and every name is a door.'' & ``Needs
+a look,'' with names that link.\\[4pt]
+``Yesterday, rolled up'' & ``Yesterday, summarized.''\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\input{platform}
+
+\end{document}

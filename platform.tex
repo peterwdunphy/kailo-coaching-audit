@@ -1,0 +1,253 @@
+% ==================================================== 2. DATA PLATFORM ===
+\section{Data and Enrichment Platform}
+\label{sec:platform}
+
+The athlete attributes in \S1 (hill resilience, weather impact, and the models
+to come) are only as good as the data feeding them. This section lays out how
+that data is sourced, enriched, and linked --- and why the platform must
+\textbf{divest fully from Athletic.net} as a scale dependency.
+
+\subsection{The Athletic.net problem}
+
+Athletic.net has the broadest US high-school coverage, and the project was built
+on it. But it is not a trustworthy dependency at scale:
+
+\begin{itemize}
+  \item \textbf{It blocks us.} Cloudflare bot management returns
+    \code{cf-mitigated=challenge} on sustained crawling. Measured over weeks:
+    $\le 1$--2 req/s ran clean for days; 3 req/s drew 24-hour blocks on two
+    consecutive days; volume near 30{,}000 requests/day drew challenges
+    regardless of rate. Exit-node rotation across six IPs did not prevent it ---
+    the block is on the traffic \emph{pattern}, not the address.
+  \item \textbf{No sanctioned access.} No API, no developer program, no
+    data-partnership channel.
+  \item \textbf{The data itself has defects} we must work around --- relay
+    results collapse to one athlete per squad; per-race timestamps are all
+    \code{T00:00:00}, so it cannot supply the race times the Weather Impact
+    model needs anyway.
+\end{itemize}
+
+\assess{Athletic.net stays as a redundancy check and for the states already
+captured, but every \emph{new} pipeline is designed against sources that answer
+reliably --- TFRRS, MileSplit, and static timing archives. The three diagrams
+below are that design.}
+
+% ------------------------------------------------------------ DIAGRAM 1 ---
+\subsection{(1) Roster, meet, and team information}
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+  font=\footnotesize,
+  node distance=6mm,
+  src/.style={draw=kailoaccent,fill=kailosoft,rounded corners=2pt,
+              minimum height=8mm,align=center,inner sep=4pt},
+  dead/.style={draw=kailowarn,fill=white,rounded corners=2pt,
+               minimum height=8mm,align=center,inner sep=4pt,dashed},
+  store/.style={draw=kailoink,fill=boxbg,rounded corners=2pt,
+                minimum height=9mm,align=center,inner sep=5pt,very thick},
+  arr/.style={-{Stealth[length=2mm]},kailoink,thick},
+  darr/.style={-{Stealth[length=2mm]},kailowarn,thick,dashed},
+  lbl/.style={font=\scriptsize\itshape,text=kailoink}
+]
+% sources column
+\node[src] (tfrrs) {\textbf{TFRRS} (DirectAthletics)\\ NCAA D1/D2/D3\\ meets $\cdot$ rosters $\cdot$ results};
+\node[src,below=of tfrrs] (ms) {\textbf{MileSplit} API\\ HS rosters $\cdot$ careers\\ venue city/state};
+\node[dead,below=of ms] (anet) {Athletic.net\\ \scriptsize(blocked; redundancy only)};
+
+% method middle
+\node[src,right=14mm of tfrrs,text width=30mm] (mtfrrs)
+  {teams $\to$ seasons\\ $\to$ meet event pages\\
+   \scriptsize(whole field per page)};
+\node[src,right=14mm of ms,text width=30mm] (mms)
+  {\code{/teams?state} $\to$ roster\\ $\to$ per-athlete results};
+
+% ledger + store
+\node[store,right=14mm of mtfrrs,yshift=-6mm,text width=28mm] (ledger)
+  {\textbf{Tier-0 raw ledger}\\ \scriptsize every response, once\\
+   \scriptsize(re-parse $=$ 0 requests)};
+\node[store,below=14mm of ledger,text width=28mm] (db)
+  {\textbf{Normalized store}\\ \scriptsize athletes $\cdot$ schools $\cdot$ meets\\
+   \scriptsize $\cdot$ performances};
+
+\draw[arr] (tfrrs) -- (mtfrrs);
+\draw[arr] (ms) -- (mms);
+\draw[darr] (anet.east) -- ++(6mm,0) |- (ledger.west);
+\draw[arr] (mtfrrs) -- (ledger);
+\draw[arr] (mms.east) -- ++(4mm,0) |- (ledger.west);
+\draw[arr] (ledger) -- (db) node[lbl,midway,right] {parse / repair};
+\end{tikzpicture}
+\caption{Roster/meet/team sourcing. Every response tees to a raw ledger before
+parsing, so a parser fix replays at zero request cost. Athletic.net (dashed)
+is demoted to redundancy.}
+\end{figure}
+
+\noindent\textbf{How it works, per source.}
+\begin{itemize}
+  \item \textbf{TFRRS (college).} Seeded from the seven NCAA-division region
+    pages, walk teams $\to$ seasons $\to$ meets. A single meet \emph{event} page
+    carries the whole field (place, athlete, class year, team, mark), so one
+    fetch covers every school in a race. Corpus: 8.1M rows, all three divisions,
+    XC + indoor + outdoor, 2021--2026.
+  \item \textbf{MileSplit (HS).} \code{/teams?state=xx} then the proven
+    per-team, per-athlete ingest path, smallest state first. Polite by default
+    (rate-limited, ledger tee). Note the enumeration cap: \code{/teams?state}
+    returns at most 999 rows, so the largest states need a per-county or
+    meet-harvest route for full coverage.
+  \item \textbf{Divest path.} New states come from MileSplit; existing
+    Athletic.net captures (CA/TX/FL/NY) are retained and merged, but no new crawl
+    depends on that host.
+\end{itemize}
+
+% ------------------------------------------------------------ DIAGRAM 2 ---
+\subsection{(2) Course weather and hill information}
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+  font=\footnotesize,
+  inp/.style={draw=kailoaccent,fill=kailosoft,rounded corners=2pt,align=center,
+             inner sep=3pt,minimum height=7mm,text width=28mm},
+  proc/.style={draw=kailoink,fill=boxbg,rounded corners=2pt,align=center,
+               inner sep=3pt,minimum height=7mm,text width=30mm},
+  res/.style={draw=kailogood,fill=white,rounded corners=2pt,align=center,
+              inner sep=3pt,minimum height=7mm,very thick,text width=28mm},
+  arr/.style={-{Stealth[length=2mm]},kailoink,thick}
+]
+% column 1: the three inputs to the race unit
+\node[inp] (flash)
+  {\textbf{Flash Results} (static S3)\\ \scriptsize per-event start times};
+\node[inp,below=6mm of flash] (venue)
+  {venue / ZIP $\to$ geocode\\ \scriptsize(TFRRS 88\%, MileSplit)};
+\node[inp,below=6mm of venue] (prior)
+  {sport-window prior\\ \scriptsize(XC $\approx$ 09--13 local)};
+
+% column 2: the race unit
+\node[proc,right=12mm of venue] (race)
+  {\textbf{Race unit}\\ \scriptsize meet $\cdot$ event $\cdot$ gender $\cdot$ heat\\
+   \scriptsize one start, one window};
+
+% column 3: weather engine + dem
+\node[proc,right=12mm of race] (omet)
+  {\textbf{Local Open-Meteo}\\ \code{127.0.0.1:8090}\\
+   \scriptsize HRRR $\to$ AROME $\to$ ICON\\ \scriptsize 15-min trace};
+\node[inp,below=6mm of omet] (dem)
+  {Copernicus DEM90\\ \scriptsize venue elevation};
+\node[inp,above=6mm of omet] (wind)
+  {\textbf{measured wind}\\ \scriptsize wind-legal events};
+
+% column 4: output
+\node[res,right=12mm of omet] (wx)
+  {\textbf{Per-race weather}\\ \scriptsize temp, apparent, humidity,\\
+   \scriptsize headwind, gust, precip};
+
+\draw[arr] (flash.east) -- (race.west);
+\draw[arr] (venue) -- (race);
+\draw[arr] (prior.east) -- (race.west);
+\draw[arr] (race) -- (omet);
+\draw[arr] (dem) -- (omet);
+\draw[arr] (omet) -- (wx);
+\draw[arr] (wind.east) -| (wx.north);
+\end{tikzpicture}
+\caption{Weather + elevation per \emph{race}, not per meet. The 11\,am women's
+JV and the 3\,pm men's varsity get different windows. Wind for sprints comes
+measured from the results themselves.}
+\end{figure}
+
+\noindent\textbf{Hill / course difficulty} (three complementary signals):
+\begin{enumerate}
+  \item \textbf{Empirical ALS course offsets (built).} A two-way log-time model
+    --- \(\log(\mathrm{equiv5k}) = \mathrm{ability} + \mathrm{offset}\), i.e.\ an
+    athlete-season term plus a course term --- solved by alternating least
+    squares over athletes who race multiple courses.
+    Validated split-half \(r=0.98\); recovered Crystal Springs $(+72\text{s})$
+    and Woodbridge $(-50\text{s})$ with no external input. It measures what
+    terrain \emph{costs}, but bundles hills with footing and weather.
+  \item \textbf{External course ratings (cross-check + decomposition).}
+    TullyRunners speed ratings, MileSplit course rankings, FloRatings A/B/C/D,
+    joshm.dev Crystal Springs Pace Factor, golf-slope analog. Joining these and
+    correlating with the ALS offset validates our number and separates
+    terrain-driven from conditions-driven difficulty.
+  \item \textbf{True elevation gain (targeted).} GPS/GPX course traces through
+    the DEM give cumulative climb per km --- the only physical hill metric, but
+    per-course external data. Reserve for marquee courses.
+\end{enumerate}
+\assess{Once weather is attached per race, re-fit the ALS \emph{net of the
+weather term}: the course offset then stops absorbing that day's heat and
+becomes a terrain-only score --- the cleanest hill metric derivable without a
+GPS trace.}
+
+% ------------------------------------------------------------ DIAGRAM 3 ---
+\subsection{(3) Linking college and high-school runners}
+
+There is no crosswalk: zero athletes carry both an Athletic.net id and a TFRRS
+id, and MileSplit's \code{tfrrsId} field is null on every bio examined. Linkage
+is therefore \emph{probabilistic}, and the honest deliverable is the ceiling.
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+  font=\footnotesize,
+  node distance=6mm,
+  pool/.style={draw=kailoaccent,fill=kailosoft,rounded corners=2pt,align=center,
+               inner sep=4pt,minimum height=9mm},
+  feat/.style={draw=kailoink,fill=boxbg,rounded corners=2pt,align=center,
+               inner sep=3pt,font=\scriptsize},
+  res/.style={draw=kailogood,fill=white,rounded corners=2pt,align=center,
+              inner sep=4pt,minimum height=9mm,very thick},
+  arr/.style={-{Stealth[length=2mm]},kailoink,thick}
+]
+\node[pool,text width=30mm] (hs) {\textbf{HS athletes}\\ \scriptsize Athletic.net\\ \scriptsize / MileSplit};
+\node[pool,below=20mm of hs,text width=30mm] (col) {\textbf{College athletes}\\ \scriptsize TFRRS};
+
+\node[feat,text width=30mm,right=12mm of hs,yshift=-5mm] (f1) {exact / fuzzy name};
+\node[feat,text width=30mm,below=2.5mm of f1] (f2) {class-year alignment};
+\node[feat,text width=30mm,below=2.5mm of f2] (f3) {event-profile consistency};
+\node[feat,text width=30mm,below=2.5mm of f3] (f4) {\textbf{HS field on TFRRS page} (1.5\%)};
+
+\node[res,right=12mm of f2,text width=30mm] (link)
+  {\textbf{Scored links}\\
+   \scriptsize $\approx$71\% pure (12{,}088)\\
+   \scriptsize strict 85.8\% 1:1 (20{,}716)};
+
+\node[res,below=8mm of link,text width=30mm] (val)
+  {\textbf{Validated}\\ \scriptsize linked marks $r=0.90$\\
+   \scriptsize D1$<$D2$<$D3 recovered};
+
+\draw[arr] (hs.east) -- (f1.west);
+\draw[arr] (col.east) -| (f4.south);
+\draw[arr] (f1.east) -- (link.west);
+\draw[arr] (f2.east) -- (link.west);
+\draw[arr] (f3.east) -- (link.west);
+\draw[arr] (f4.east) -- (link.west);
+\draw[arr] (link) -- (val);
+\end{tikzpicture}
+\caption{Probabilistic HS$\to$college linkage. No exact key exists; a scored
+combination of name, year and event profile reaches $\sim$71\% precision, and
+TFRRS athlete pages carry a literal High School field (1.5\% of pages) that
+opens a path to a \emph{real} crosswalk by crawling those pages directly.}
+\end{figure}
+
+\noindent\textbf{The route to a real crosswalk.} TFRRS athlete pages carry a
+literal \emph{``High School:''} field on 1.5\% of archived pages (roster pages do
+not). Crawling athlete pages directly --- rather than inferring identity from
+names --- upgrades the linkage from probabilistic to keyed for the athletes who
+have it, and is the recommended next step for the recruiting and progression
+models.
+
+\subsection{Build order}
+Steps that cost nothing against any host come first:
+\begin{enumerate}
+  \item Venue + geo columns; reparse venue from the archived TFRRS/MileSplit
+    payloads. \textbf{Zero requests.}
+  \item Wind column on performances; backfill from archived Athletic.net
+    payloads (wind-legal events). \textbf{Zero requests.}
+  \item Flash Results time crawler --- new host, static S3, its own polite
+    profile and ledger. Start with the NCAA championship/regional set and
+    measure the match rate before scaling.
+  \item Weather adapter: emit a per-race manifest, run the existing
+    \code{\char`\~/weather} Open-Meteo pipeline unchanged, reduce to
+    race-window aggregates.
+  \item Course difficulty: ship the ALS offset, join external ratings as a
+    check, then re-fit net of weather for a terrain-only score.
+\end{enumerate}

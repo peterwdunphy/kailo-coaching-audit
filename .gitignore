@@ -1,0 +1,7 @@
+# tectonic / latex build artifacts
+*.aux
+*.log
+*.out
+*.xdv
+*.toc
+*.synctex.gz
