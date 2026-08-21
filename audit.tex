@@ -96,8 +96,8 @@
 \begin{enumerate}
   \item \textbf{Restructure the hub into the five-tab layout} of
     \S\ref{sec:proposal} --- Today, Upcoming, Team, Recruiting (v2), Settings
-    --- with the athlete page reached through Team $\to$ Roster or Team $\to$
-    Results rather than as its own tab.
+    --- with the athlete page reached through the Team tab (roster, results,
+    or the PR / progression boards) rather than as its own tab.
   \item \textbf{Athlete objects with histories and attributes.} Each athlete
     carries a history (race and training paces over time) \emph{and} a set of
     learned attributes --- e.g.\ ``performs better on hilly courses,''
@@ -208,19 +208,21 @@ per-page recommendations above.
     Absorbs race plans (from Team board) and the Plan \& Goals material
     currently inside Volume.
   \item \textbf{Team} --- a team landing page (name, picture,
-    conference/division information, the team document, and the Operations
-    material), with routes into:
+    conference/division information, the team document), with routes into:
     \begin{itemize}
       \item \textbf{Roster} --- the public-roster-style list; selecting an
         athlete opens their page (layout below);
       \item \textbf{Results} --- the central results repository (by meet,
         season progression, record board, courses), where every athlete name
         links to that athlete's page;
-      \item \textbf{PRs / season progression} views.
+      \item \textbf{PRs / season progression} --- selecting an athlete goes
+        to their page;
+      \item \textbf{Operations} --- logistics: money, equipment, the .ics
+        calendar export.
     \end{itemize}
-    The athlete page is deliberately \emph{not} a top-level tab: the two
-    routes converge on it (Figure~\ref{fig:teamflow}), so a coach reaches the
-    same athlete object whether they come through the roster or through a
+    The athlete page is deliberately \emph{not} a top-level tab: the routes
+    converge on it (Figure~\ref{fig:teamflow}), so a coach reaches the same
+    athlete object whether they come through the roster, the boards, or a
     result.
   \item \textbf{Recruiting} --- reserved as a tab, but a \emph{v2 product};
     not built in v1. (Recruit-visit mode --- masking athlete names --- ships
@@ -231,6 +233,154 @@ per-page recommendations above.
     import/export, recruit-visit mode, and the feature toggles (turn modules
     such as 1-on-1 tracking on or off).
 \end{enumerate}
+
+Table~\ref{tab:proposal} maps the proposal onto the current hub; the expanded
+plans below give the per-tab build detail.
+
+\begin{table}[h]
+\centering\small
+\begin{tabular}{@{}p{0.12\linewidth}p{0.42\linewidth}p{0.36\linewidth}@{}}
+\toprule
+\textbf{Tab} & \textbf{Routes / contents} & \textbf{Absorbs from current hub}\\
+\midrule
+Today & glance row; conditions (four windows); today's plan + print; needs a
+  look; most recent session; tasks &
+  Today, Tasks + Links, Session review (as a module), Inbox (flags)\\[3pt]
+Upcoming & the planner at four zooms: block $\to$ week $\to$ day $\to$
+  athlete preview; race plans; plan \& goals &
+  Planner, Workout planner, Athlete day, Team board (race plans), Volume
+  (goals), Week wall (as a view)\\[3pt]
+Team & landing page; Roster; Results; PRs / progression; Operations; the
+  athlete pages &
+  The Roster tier, Team board (team document, PR board), Operations, 1-on-1s
+  (linked from athlete pages)\\[3pt]
+Recruiting & v2 placeholder &
+  Recruiting file (from the person file)\\[3pt]
+Settings & data import; team / coach / program; workout rules; parameters;
+  predictions; feature toggles; recruit-visit mode; bulk import/export; help &
+  Data health, Setup, Parameters, Predictions, ``Rules baked in,'' How this
+  works\\
+\bottomrule
+\end{tabular}
+\caption{The proposed five-tab structure, and where the current hub's pages
+land.}
+\label{tab:proposal}
+\end{table}
+
+% ============================== expanded plans, tab by tab ==============
+\subsection{Expanded plans}
+\label{sec:expanded}
+
+First-pass build detail per tab. The athlete page gets the most, since it is
+the object the rest of the product hangs off.
+
+\subsubsection{Today}
+
+The landing page answers ``what do I need to know before practice'' in one
+screen (Figure~\ref{fig:todaywire}):
+
+\begin{itemize}
+  \item \textbf{Glance row} --- uploaded yesterday, available today, data
+    flags / gone quiet, needs a look (the renamed ``Where your attention
+    goes''), each a compact tile whose names link.
+  \item \textbf{Conditions strip} --- \emph{four} windows (this morning, this
+    afternoon, tomorrow morning, tomorrow afternoon) so doubles are covered,
+    computed on wet-bulb globe temperature rather than dew point.
+  \item \textbf{Today's plan} --- with the print option kept one click away.
+  \item \textbf{Most recent session} --- the Session review material as a
+    module, with historical sessions reachable from it.
+  \item \textbf{Tasks} --- the task organizer from Tasks + Links as a widget.
+\end{itemize}
+
+Every widget is collapsible; the widget set and its order are per-coach.
+Build order: the widget framework (collapse + persistence) first, then the
+conditions strip, then the recent-session module.
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[x=1mm,y=1mm,font=\scriptsize,
+  wid/.style={draw=kailorule,fill=white,rounded corners=1pt,align=center,
+    inner sep=1pt},
+  cond/.style={draw=kailoaccent,fill=kailosoft,rounded corners=1pt,
+    align=center,inner sep=1pt},
+  hint/.style={draw=promptgray,dashed,rounded corners=1pt,align=center,
+    inner sep=1pt}]
+  \draw[draw=kailoink,rounded corners=2pt] (0,0) rectangle (120,64);
+  \node[wid,minimum width=27mm,minimum height=9mm] at (16,58)  {uploaded\\yesterday};
+  \node[wid,minimum width=27mm,minimum height=9mm] at (45,58)  {available\\today};
+  \node[wid,minimum width=27mm,minimum height=9mm] at (74,58)  {data flags /\\gone quiet};
+  \node[wid,minimum width=27mm,minimum height=9mm] at (103,58) {needs a look};
+  \node[cond,minimum width=114mm,minimum height=9mm] at (60,46.5)
+    {\textbf{conditions (WBGT)}: this morning $\mid$ this afternoon $\mid$
+     tomorrow morning $\mid$ tomorrow afternoon};
+  \node[wid,minimum width=56mm,minimum height=30mm] at (31,24.5)
+    {\textbf{today's plan}\\{\color{promptgray}[print]}};
+  \node[wid,minimum width=57mm,minimum height=15mm] at (88.5,32)
+    {\textbf{most recent session}\\{\color{promptgray}(from Session review)}};
+  \node[wid,minimum width=57mm,minimum height=13mm] at (88.5,16)
+    {\textbf{tasks}\\{\color{promptgray}(from Tasks + Links)}};
+  \node[hint,minimum width=114mm,minimum height=6mm] at (60,4.8)
+    {\itshape every widget collapsible --- set and order per-coach};
+\end{tikzpicture}
+\caption{Today as one screen. The glance row links to people; conditions
+cover four windows so doubles are never blind.}
+\label{fig:todaywire}
+\end{figure}
+
+\subsubsection{Upcoming}
+
+One planning object at four zoom levels, rather than three separate pages
+(Figure~\ref{fig:zoom}): the season block (phases, goals, peak mileage,
+down-week depth --- absorbing Volume's Plan \& Goals), the week grid (Week
+wall becomes a view option here, not a page), the single day (the Workout
+planner's pods, paces, and weather/terrain adjustments), and the athlete
+preview (Athlete day as a ``preview'' button, not a destination).
+
+\begin{itemize}
+  \item \textbf{Text-to-structured-workout parsing} is the load-bearing
+    technical piece: ``2 mile wu, 5 tempo, 3 cd'' typed in the grid must
+    become a structured workout that can be analyzed post hoc.
+  \item \textbf{Race plans} move here from Team board and attach to meet
+    dates: per-athlete goals plus predicted pace ranges, and eventually MCMC
+    field simulations against expected competition.
+  \item \textbf{Training paces} (the Pace cards content) surface here as
+    links; the paces themselves live on the athlete page.
+\end{itemize}
+
+Build order: the four-zoom shell around the existing planner first; the text
+parser next; the race-plan predictive layer last.
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[font=\scriptsize,
+  hz/.style={draw=kailoaccent,fill=kailosoft,rounded corners=2pt,
+    align=center,text width=26mm,inner sep=3pt,minimum height=16mm},
+  arr/.style={-{Stealth[length=1.6mm]},kailoink,thick}]
+  \node[hz] (blk) at (0,0)   {\textbf{Season block}\\[1pt]phases, goals,
+    peak mileage, down-weeks};
+  \node[hz] (wk)  at (3.6,0) {\textbf{Week grid}\\[1pt]text entry $\to$
+    structured workout};
+  \node[hz] (day) at (7.2,0) {\textbf{Day}\\[1pt]pods, paces,
+    weather/terrain adjustments};
+  \node[hz] (pv)  at (10.8,0){\textbf{Athlete preview}\\[1pt]what the
+    athlete's app shows};
+  \draw[arr] (blk)--(wk); \draw[arr] (wk)--(day); \draw[arr] (day)--(pv);
+\end{tikzpicture}
+\caption{Upcoming: one planning object at four zoom levels. The current
+Planner / Workout planner / Athlete day split becomes zooming, not separate
+pages.}
+\label{fig:zoom}
+\end{figure}
+
+\subsubsection{Team}
+
+A team landing page --- name, picture, conference/division information, the
+team document (rules / creeds / values), and the PR board --- with four
+routes (Figure~\ref{fig:teamflow}): the Roster, the Results repository
+(import as a pop-up, not a tab), the PR / season-progression boards, and
+Operations (money, equipment, the .ics export of the meet and training
+calendar). Every surface that shows an athlete's name --- roster row, result
+line, PR board entry --- opens the same athlete page.
 
 \begin{figure}[h]
 \centering
@@ -243,24 +393,28 @@ per-page recommendations above.
     align=center,inner sep=5pt},
   arr/.style={-{Stealth[length=1.6mm]},kailoink}]
   \node[tabnode] (team) at (0,0) {\textbf{Team}\\{\scriptsize landing page}};
-  \node[leaf] (roster)  at (3.6, 1.15) {Roster};
-  \node[leaf] (prs)     at (3.6, 0)    {PRs / progression};
-  \node[leaf] (results) at (3.6,-1.15) {Results};
-  \node[athnode] (ath)  at (8.2, 0)    {\textbf{Athlete page}};
+  \node[leaf] (roster)  at (3.6, 1.8)  {Roster};
+  \node[leaf] (prs)     at (3.6, 0.6)  {PRs / progression};
+  \node[leaf] (results) at (3.6,-0.6)  {Results};
+  \node[leaf] (ops)     at (3.6,-1.8)  {Operations};
+  \node[athnode] (ath)  at (8.2, 0.6)  {\textbf{Athlete page}};
   \draw[arr] (team) -- (roster);
   \draw[arr] (team) -- (prs);
   \draw[arr] (team) -- (results);
+  \draw[arr] (team) -- (ops);
   \draw[arr] (roster)  -- (ath)
     node[midway,above,sloped,font=\scriptsize]{select athlete};
+  \draw[arr] (prs)     -- (ath);
   \draw[arr] (results) -- (ath)
     node[midway,below,sloped,font=\scriptsize]{click a name};
 \end{tikzpicture}
-\caption{The Team tab. The athlete page is secondary: reached via the roster
-or by clicking a name in any result --- both routes land on the same object.}
+\caption{The Team tab. The athlete page is secondary: reached from the
+roster, the PR / progression boards, or any result line --- all three
+converge on the same object. Operations stays team-level.}
 \label{fig:teamflow}
 \end{figure}
 
-\subsubsection{The athlete page (reached via Roster or Results; three tiers, top to bottom)}
+\paragraph{The athlete page (three tiers, top to bottom).}
 \begin{description}[leftmargin=0em,style=nextline,itemsep=3pt]
   \item[Identity (top, glanceable).] Name, gender, class, hometown, MileSplit and Athletic.net links, and PRs --- the public-roster feel the audit of the current Athlete page calls for.
   \item[Secondary.] Recent race results, recent training (a week-over-week mileage graph), attendance / training log, past and current injuries, upcoming registered events (date, name, event), training paces, and stated goals. Person-file material (dietary restrictions, class schedules, paperwork) stays populated further down; anything duplicated elsewhere (e.g.\ 1-on-1 notes) becomes a link, not a repeated widget.
@@ -271,6 +425,69 @@ or by clicking a name in any result --- both routes land on the same object.}
       \item Additional analytical models as desired.
     \end{itemize}
 \end{description}
+
+Build order: the identity and secondary tiers ship first --- they display
+data already held. The analytics tier lands as the platform models mature
+(\S\ref{sec:platform}), each model appearing as an optional widget rather
+than a blank promise.
+
+\subsubsection{Recruiting (v2)}
+
+Reserved as a tab but not built in v1; recruit-visit mode (masking athlete
+names) ships in v1 under Settings. When v2 comes, the tab inherits the
+recruiting file from the current person file, and the HS $\leftrightarrow$
+college linkage of \S\ref{sec:platform} is its natural engine: a coach looks
+up a prospect's verified HS results and course-adjusted marks rather than a
+self-reported PR.
+
+\subsubsection{Settings}
+
+One standardized menu (Figure~\ref{fig:settings}) replaces the Housekeeping
+tier: data importation from Data health, the Setup panels split into their
+own tabs, the Workout planner's ``Rules baked in,'' the Parameters and
+Predictions pages, feature toggles (the grand-strategy layering --- run the
+product as anything from roster-plus-planner up to the full analytics
+surface), recruit-visit mode, and bulk import/export, with ``How this
+works'' as the help entry. If the paperwork tracked in Data health is
+medical clearances, it moves to the Team tab's roster as a
+who-is-missing-paperwork widget --- it is compliance, not data flow. This
+tab is a mechanical regrouping with no new functionality, which makes it a
+good early milestone.
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[font=\scriptsize,
+  root/.style={draw=kailoaccent,fill=kailosoft,rounded corners=2pt,
+    align=center,inner sep=5pt},
+  sleaf/.style={draw=kailorule,fill=white,rounded corners=1pt,
+    inner sep=2.5pt},
+  ln/.style={kailorule}]
+  \node[root] (s) at (0,0) {\textbf{Settings}};
+  \node[sleaf,anchor=west] (l1) at (3.0, 2.4)
+    {data import {\color{promptgray}(Data health: coverage, sources, flags)}};
+  \node[sleaf,anchor=west] (l2) at (3.0, 1.8)
+    {team settings {\color{promptgray}(name, locations, access)}};
+  \node[sleaf,anchor=west] (l3) at (3.0, 1.2)
+    {program / coach settings};
+  \node[sleaf,anchor=west] (l4) at (3.0, 0.6)
+    {workout planner rules {\color{promptgray}(``Rules baked in'')}};
+  \node[sleaf,anchor=west] (l5) at (3.0, 0)
+    {athlete parameters {\color{promptgray}(critical speed, D-prime, \ldots)}};
+  \node[sleaf,anchor=west] (l6) at (3.0,-0.6)
+    {predictions {\color{promptgray}(accuracy, calibration)}};
+  \node[sleaf,anchor=west] (l7) at (3.0,-1.2)
+    {feature toggles {\color{promptgray}(modules on / off)}};
+  \node[sleaf,anchor=west] (l8) at (3.0,-1.8)
+    {recruit-visit mode};
+  \node[sleaf,anchor=west] (l9) at (3.0,-2.4)
+    {bulk import / export; help {\color{promptgray}(How this works)}};
+  \foreach \l in {l1,l2,l3,l4,l5,l6,l7,l8,l9}
+    \draw[ln] (s.east) -- (\l.west);
+\end{tikzpicture}
+\caption{The Settings menu, centralizing what is currently scattered across
+Housekeeping, the Workout planner, and the athlete sub-pages.}
+\label{fig:settings}
+\end{figure}
 
 \subsection{Wording}
 
