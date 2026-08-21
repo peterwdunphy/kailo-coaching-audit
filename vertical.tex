@@ -8,125 +8,108 @@
 \subsubsection{Before Practice}
 
 \pg{Today}\daytag{5:30a Brief}\par
-This is the landing page (\code{kailo.fit/hub}) --- a long stack of text
-widgets. Top widgets: \emph{``[N] uploaded yesterday,'' ``Available today,''
-``Data flags,'' ``Gone quiet,'' ``Need a look,''} and \emph{``Dew point at
-practice.''} Below them: \emph{``Where your attention goes''} (activities flagged
-abnormal --- average heart rate high on an easy run, distance longer than
-expected), a \emph{``Today's plan''} widget with a print option, and a practice
-conditions widget (\emph{``Conditions this afternoon''}).
+This is the landing page (\code{kailo.fit/hub}) --- a long stack of text widgets. Top widgets: \emph{``[N] uploaded yesterday,'' ``Available today,'' ``Data flags,'' ``Gone quiet,'' ``Need a look,''} and \emph{``Dew point at practice.''} Below them: \emph{``Where your attention goes''} (activities flagged abnormal --- average heart rate high on an easy run, distance longer than expected), a \emph{``Today's plan''} widget with a print option, and a practice conditions widget (\emph{``Conditions this afternoon''}).
 \begin{itemize}
-  \item \textbf{Keep high-quality, accessible print.} The plan's print option is
-    good and should stay easy to reach throughout.
-  \item \textbf{Conditions is buried and single-window.} It sits too far down,
-    does not currently populate, and only shows the afternoon --- athletes
-    running \emph{doubles} lose the morning window entirely.
+  \item \textbf{Keep high-quality, accessible print.} The plan's print option is good and should stay easy to reach throughout.
+  \item \textbf{Conditions is buried and single-window.} It sits too far down, does not currently populate, and only shows the afternoon --- athletes running \emph{doubles} lose the morning window entirely.
   \item \textbf{No expand/collapse} on any widget, producing a very long page.
 \end{itemize}
-\assess{Too much information, almost all of it text, with no visual hierarchy to
-separate what matters. Because this is the landing page, deep customization is
-essential --- and this critique of the landing page is the critique of the whole
-product.}
+\assess{Too much information, almost all of it text, with no visual hierarchy to separate what matters. Because this is the landing page, deep customization is essential.}
 
 \pg{Tasks + Links}\par
-\prompt{Analysis of the Tasks + Links page --- what it is, what works, what does
-not.}
-\assess{\prompt{page assessment}}
+This is a simple and considerably shorter page than the Today screen. It consists of two widgets: a basic task organizer and a place to store hyperlinks. The quick links widget prompts, ``Add the ones you reach for weekly - entries, results, the conference site.''
+\assess{A dedicated task page is likely useful, with a connected widget that can be added to a landing page. I don't see much long term need for the ``Quick links'' section. Anything that would go there should be put into their proper place.}
 
 \pg{Planner}\daytag{Plan}\par
-\prompt{Analysis of the Planner page.}
-\assess{\prompt{page assessment}}
+The planner page is a core of the aspect of the product. This has planning capabilities of the entire season (so day, week, and entire training block). Weeks can be toggled one by one. There is a pin every Wednesday in this example. I am interested to know how the week grid works. Namely, does inputting text create a formatted workout? We ideally want some way that in the grid, one can write, ``Easy 45 Minutes'' or ``2 mile wu, 5 tempo, 3 cd,'' then a recoverable analysis of the workout based on how they completed it vs predicted (easy pace was faster or higher HR than normal, tempo pace is improving)
+\assess{This will be a core page going forward that should anchor a future ``Upcoming'' section.Technical considerations must be made to determine the degree to which text inputs can create structured workouts that can be analyzed post hoc. }
 
 \pg{Workout planner}\daytag{Resolve}\par
-\prompt{Analysis of the Workout planner page.}
-\assess{\prompt{page assessment}}
+This seems to be a more zoomed-in version of the planner day above. This allows for creating workout pods, prescribing paces for a workout, and making weather/terrain adjustments. Again, there is some instructional language here that is just a bit over the top, such as ``The question: one date, six lanes. I plug the workout in, the groups and paces come out, weather and terrain already applied.'' I'm not sure what the ``What moved since last week'' section corresponds to, unless it's simply product updates. There is a Rules baked in section, which is basically settings. 
+\assess{Dew point is currently the listed weather metric to determine weather adjustments. Based on literature, we'd probably want this to move to wet bulb globe temperature. The rules baked in section should be deleted and moved to being a link to the workout planner settings page for organizational purposes. As above, we need to put in technical work to make the text to planner works better. For instance, I tried to write, ``5 up, 2 tempo, 3 cd'' and the current iteration put ``2 tempo, 3 cd'' as the recovery.}
 
 \pg{Pace cards}\par
-\prompt{Analysis of the Pace cards page.}
-\assess{\prompt{page assessment}}
+Basically the V.Dot training paces. It is unclear what ``Provisional'' means here. It prompts users to ask if they want ``page'' or ``phone'' views. The prescribed paces are: ``This week,'' ``Easy days,'' ``Long run,'' ``Weekly probe.''
+\assess{This is again a core feature that should probably be linked in the training section but live under the Athlete pages. I don't understand the logic for why certain paces are exlcuded --- namely recovery and tempo/LT.}
 
-\tierassess{\prompt{General assessment of the Before Practice tier --- does the
-grouping cohere, is the ordering right, what is missing?}}
+\tierassess{In general this tier is too much of a catchall for the core elements of the product. This isn't necessarily a problem on its own. However, given how loaded this part is with features compared to the next two Tier-0 categories (Share with the Team and After Practice), it suggests there are better ways to organize these data and features to disperse it in a more coherent and balanced way. I would recommend creating a ``Today'' landing page and ``Upcoming'' planning sections that splits up this data.}
 
-% ------------------------------------------------------- SHARE WITH THE TEAM ---
+% ----------------------------------- SHARE WITH THE TEAM ---
 \subsubsection{Share with the Team}
 
 \pg{Athlete day}\daytag{Push + Post}\par
-\prompt{Analysis of the Athlete day page.}
-\assess{\prompt{page assessment}}
+This page allows you to see what a given athlete sees on their Kailo app for each day's practice. 
+\assess{This page can likely be a submodule of existing planners as a ``Preview'' option.}
 
 \pg{Team board}\par
-\prompt{Analysis of the Team board page.}
-\assess{\prompt{page assessment}}
+This page is a grab bag of different planning and team-related tools. ``This week'' is the first tab and is similar to the Workout Planner. PR Board, currently unpopulated, seems to be a way to assemble the number of PRs from a given meet? or overall PRs? The team document, also currently unpopulated, seems to be a place to populate team rules/creeds/values. Race plans allow the user to add different goals/plans for specific athletes for specific races. You can also input other teams' results.
+\assess{This page has too many disparate elements that limit its usefulness. While there is a conceptual core, there are better modules to places race info, weekly planning, team rules, and team PRs. A specific team homepage would be useful, which could contain important division/conference information along with the team document. Race plans can definitely be definitely improved by adding both predictive modeling for a given athletes (predicted pace range) along with MCMC simulations to see how that given athlete stacks up against expected competition.}
 
 \pg{1-on-1s}\par
-\prompt{Analysis of the 1-on-1s page.}
-\assess{\prompt{page assessment}}
+This is a central repository to prepare and document 1-on-1s. The structure of the meeting notes isn't great since there is no expand-collapse, so long notes would render the page extremely long.
+\assess{I think this is probably a service that only some coaches will use, given that many won't impute notes on meetings, but it is a good feature to have. However, like other features in this section, I think it could be moved to a better location.}
 
-\tierassess{\prompt{General assessment of the Share with the Team tier.}}
+\tierassess{Generally, the features in this tier are all individually useful, but some read as redundant of other features and all of them could be placed in more intuitive locations. I would recommend removing this as an organizing tier to split data between future Today, Upcoming, and Athletes/Team sections.}
 
 % ---------------------------------------------------------- AFTER PRACTICE ---
 \subsubsection{After Practice}
 
 \pg{Session review}\daytag{Review}\par
-\prompt{Analysis of the Session review page.}
-\assess{\prompt{page assessment}}
+Currently this page is not populated at all, which makes it hard for me to fully assess. But it seems to be information about the most recent session. 
+\assess{This page is, of course, extremely central to coaching. We can create a ``Most recent session results'' module for the ``Today'' screen with the information in this section. But we need a space to put historical session data (e.g., the session from five days ago).}
 
 \pg{Inbox}\par
-\prompt{Analysis of the Inbox page.}
-\assess{\prompt{page assessment}}
+Some of these are repeated widgets from the current ``Today'' page (namely, the ``Needs a look'' section and there is some overlap in the ``Contact coverage''). The Reason ledger and Confounds sections are not fully populated for me, so I can't fully assess what's in them (though the ltter seems to be some predictive or analytical system).
+\assess{Similar to the Share with the Team section, I think there is important information in this section that would be better served being moved to a different header in a more optimal organizing strategy.}
 
-\tierassess{\prompt{General assessment of the After Practice tier.}}
+\tierassess{I echo what I said in the Share with the Team section: many of these features are useful but are either redundant or not optimally placed. I also think that coaches need a way to toggle having certain features on or off, such as meeting tracking with students. If a coach weren't to manually input that information, the app may annoy them that they're never meeting with students. As part of the customization layer, it would be useful to treat some of the functionality as similar to a grand strategy video game where you can add layers/features as you want but also simply use it as a more basic tool of just roster visuals and workout planning.}
 
 % ------------------------------------------------------------- THE ROSTER ---
 \subsubsection{The Roster}
 
 \pg{Week wall}\daytag{Adjust}\par
-\prompt{Analysis of the Week wall page.}
-\assess{\prompt{page assessment}}
+This seems to be another calendar overview of the training week. For me it is only populated by two athletes. 
+\assess{Important information but redundant to other pages. Perhaps other pages on training programs could have various different view options, so you could have a ``week view'' option like this.}
 
 \pg{Volume}\par
-\prompt{Analysis of the Volume page.}
-\assess{\prompt{page assessment}}
+\prompt{Key page of athlete name, 7-day, 28-day wk/wk \% volume, rest days, last upload, percent complete, directive, loop, trend (in histogram form) are all under the default ``This window'' pane. The second pane is ``Plan \& Goals,'' which has weekly volume goals and season peak mileage goals (and down week depth). There are unpopulated Actuals and Adherence panes}
+\assess{There needs to be a legend for certain terms or concepts like Complete \%, wk/wk \%, directive, loop. The trending inlay graph is pretty but I'm not sure about the use. In general, lots of the information here is useful. But again, the Plans \& Goals section would be better nestled in a planning section.}
 
 \pg{Athlete}\par
-The athlete object, with three sub-pages (Parameters, Results, Predictions).
-This is where the athlete history + learned attributes of \S1 surface.
-\prompt{Analysis of the Athlete page as a whole.}
+This is basically a roster. It is a drop down. Upon selecting an athlete, you get ``The person file'' with high school info, dietary restrictions, and class schedules. There is also information about surveys and check-ins, notes, and their stated goals. The pages continues to Paperwork, Training room, Recruiting file, class schedule, Medical and emergency contact.
+\assess{In general this page is pretty long. This is more like an athlete's settings than a landing page. I think perhaps a more optimal landing page would be more similar to a public roster, where it has name, grade, gender, hometown, PRs, recent race results, and recent training (week over week mileage graph, perhaps) along with some future oriented things like goals. There could then be populated dietary and class schedule, but some of the things that are currently on the page could be simply links to other parts instead of repeated widgets (such as 1-on-1 notes).}
 
-\pg{Athlete $\rightarrow$ Parameters}\par
-\prompt{Analysis of the Parameters sub-page.}
-\assess{\prompt{page assessment}}
+\pg{Parameters}\par
+\prompt{This is a list of different parameters produced through modeling we have per athlete. These include critical speed, rx width, d prime, anchors, speed reserve, extrapolating.}
+\assess{The listed critical speed (with the CIs attached) could be an optional widget added to athletes profiles. This page, generally, is probably best kept in the settings.}
 
-\pg{Athlete $\rightarrow$ Results}\par
-\prompt{Analysis of the Results sub-page.}
-\assess{\prompt{page assessment}}
+\pg{Results}\par
+\prompt{As expected results page tabs for ``by meet,'' ``season progression,'' ``record board,'' ``courses,'' ``import,'' ``goals,'' and ``season review.'' }
+\assess{As said above, some of the recent results and PRs could probably be included as (optional) widgets on the athlete profile page. But a central results repository is still important to include in the ``Team'' section. The import option should be a hyperlink to a pop-up, not as its own tab. Some of the remaining information could likely be either reorganized or broken into different pages.}
 
-\pg{Athlete $\rightarrow$ Predictions}\par
-\prompt{Analysis of the Predictions sub-page.}
-\assess{\prompt{page assessment}}
+\pg{Predictions}\par
+This is a page devoted to assessing how accurate past race predictions were. Past results are shown (``Locked before the gun'') in a widget, followed by a grading widget, a calibration widget, and a larger season replay widget. 
+\assess{I'm not sure how central this page is. Perhaps because no predictions have been given yet, nor can I see current predictions, this page seems to be better as a page nestled in the settings.}
 
-\tierassess{\prompt{General assessment of The Roster tier --- and whether the
-Athlete object belongs here or should be its own top-level tab (cf.\ the
-proposed five-tab structure).}}
+\tierassess{This is the section where not being able to click the tier-0 module name (The Roster) is the most frustrating). I think the optional flow would be to have a ``Team'' landing page with team name, picture, conference/division information. This will then have a button to see roster, another for results, another for PRs, then perhaps season progression.}
 
 % ------------------------------------------------------------ HOUSEKEEPING ---
 \subsubsection{Housekeeping}
 
 \pg{Operations}\par
-\prompt{Analysis of the Operations page.}
-\assess{\prompt{page assessment}}
+This is a page for logistic/operational components of coaching, such as money or equipment information. It also allows for .ics exportation of meet/training calendar information. The first two tabs --- season board and this meet --- seem to be repeats of existing data.
+\assess{This is probably better nestled under the Team label instead of the Housekeeping label, since I think the latter is better served as settings.}
 
 \pg{Data health}\par
-\prompt{Analysis of the Data health page.}
-\assess{\prompt{page assessment}}
+This is more of a classic settings page on data importation. The first widget (Coverage) shows runs carrying a heart-rate average, sessions uploads carrying lap marks, and athletes with a band prescribed today. This is followed by a widget on whose data is not arriving. There is then a long widget of where each athlete's data comes from (Strava v Garmin). There is also an extremely long page of flags from the data (Things worth knowing about the data). Finally, there is a widget of who is missing paperwork.
+\assess{I'm not sure if the paperwork described is medical clearances. If so, that information is too different from the data stuff here to be included. I think this could be better written as a ``Data importation'' settings menu.}
 
 \pg{How this works}\par
-\prompt{Analysis of the How this works page.}
-\assess{\prompt{page assessment}}
+Not populated introduction/explainer for the app.
+\assess{Obvious need.}
 
 \pg{Setup}\par
-\prompt{Analysis of the Setup page.}
-\assess{\prompt{page assessment}}
+Lots of settings panels here, which can all be broken into their own settings tabs. These include ``Recruit-visit mode,'' which masks athlete names ``so a campus visit sees the machinery and not the people.'' There are also settings about program information, team information (name, location, coaches/access settings), and data flags. There are also bulk import and export widgets
+\assess{These need to be built out as its own settings menu. This includes turn on recruit visit mode, team settings (which includes team/practice location), coach settings, bulk import/export, and various other settings listed above.}
 
-\tierassess{\prompt{General assessment of the Housekeeping tier.}}
+\tierassess{There is a clear need to make this page into a more standardized settings menu that centralizes many of the options scattered throughout the current system.}

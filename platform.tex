@@ -180,9 +180,7 @@ GPS trace.}
 % ------------------------------------------------------------ DIAGRAM 3 ---
 \subsection{(3) Linking college and high-school runners}
 
-There is no crosswalk: zero athletes carry both an Athletic.net id and a TFRRS
-id, and MileSplit's \code{tfrrsId} field is null on every bio examined. Linkage
-is therefore \emph{probabilistic}, and the honest deliverable is the ceiling.
+There is no crosswalk: zero athletes carry both an Athletic.net id and a TFRRS id, and MileSplit's \code{tfrrsId} field is null on every bio examined. Linkage is therefore \emph{probabilistic}, and the honest deliverable is the ceiling.
 
 \begin{figure}[h]
 \centering
@@ -222,10 +220,7 @@ is therefore \emph{probabilistic}, and the honest deliverable is the ceiling.
 \draw[arr] (f4.east) -- (link.west);
 \draw[arr] (link) -- (val);
 \end{tikzpicture}
-\caption{Probabilistic HS$\to$college linkage. No exact key exists; a scored
-combination of name, year and event profile reaches $\sim$71\% precision, and
-TFRRS athlete pages carry a literal High School field (1.5\% of pages) that
-opens a path to a \emph{real} crosswalk by crawling those pages directly.}
+\caption{Probabilistic HS$\to$college linkage. No exact key exists; a scored combination of name, year and event profile reaches $\sim$71\% precision, and TFRRS athlete pages carry a literal High School field (1.5\% of pages) that opens a path to a \emph{real} crosswalk by crawling those pages directly.}
 \end{figure}
 
 \noindent\textbf{The route to a real crosswalk.} TFRRS athlete pages carry a

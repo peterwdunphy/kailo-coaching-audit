@@ -63,8 +63,8 @@
 
 % a to-fill placeholder, visibly provisional
 \newcommand{\prompt}[1]{\par\vspace{2pt}%
-  {\small\itshape\color{promptgray}[\,#1\,]}\par}
-
+  \noindent{\small\itshape\color{promptgray}[\,#1\,]\par}}
+  
 % ================================================================== title ===
 \begin{document}
 \begin{center}
@@ -114,16 +114,17 @@
 The desktop hub is organized on two axes.
 
 \begin{itemize}
-  \item \textbf{Vertical axis --- thematic.} A left pane (top on narrow screens)
-    of \textbf{five tier-0 objects}, each containing pages. The tier-0 objects
-    are \emph{Before Practice}, \emph{Share with the Team}, \emph{After
-    Practice}, \emph{The Roster}, and \emph{Housekeeping}. Their labels are not
-    clickable; the pages beneath them are. This axis is the spine of the audit
-    below --- every page gets an analysis, and every tier-0 object gets a
-    general assessment.
-  \item \textbf{Horizontal axis --- temporal.} The coach's day, as a left-to-right
-    flow. Each step is simply a \textbf{hyperlink} to one of the vertical-axis
-    pages (Figure~\ref{fig:day}).
+  \item \textbf{Vertical axis --- thematic.} A left pane (top on narrow screens) of \textbf{five tier-0 objects}, each containing pages (Figure~\ref{fig:vertical_axis}). The tier-0 objects are \emph{Before Practice}, \emph{Share with the Team}, \emph{After Practice}, \emph{The Roster}, and \emph{Housekeeping}. Their labels are not clickable; the pages beneath them are. This axis is the spine of the audit below --- every page gets an analysis, and every tier-0 object gets a general assessment.
+\end{itemize}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\linewidth]{fig/vertical_axis.png}
+    \caption{Vertical (thematic) axis as of August 21, 2026}
+    \label{fig:vertical_axis}
+\end{figure}
+
+\begin{itemize}
+  \item \textbf{Horizontal axis --- temporal.} The coach's day, as a left-to-right flow. Each step is simply a \textbf{hyperlink} to one of the vertical-axis pages (Figure~\ref{fig:day}).
 \end{itemize}
 
 \begin{figure}[h]
@@ -149,9 +150,7 @@ vertical-axis page. \textbf{4:00p Practice currently links nowhere.}}
 \label{fig:day}
 \end{figure}
 
-\noindent\textbf{The day cuts across the thematic tiers.} The seven day-steps do
-not live inside one tier-0 object --- they thread through four of them:
-
+\noindent\textbf{The day cuts across the thematic tiers.} The seven day-steps do not live inside one tier-0 object --- they thread through four of them:
 \begin{center}\small
 \begin{tabular}{@{}lll@{}}
 \toprule
@@ -168,9 +167,7 @@ Adjust & Week wall & The Roster\\
 \end{tabular}
 \end{center}
 
-\prompt{Observation to develop: whether the day-flow, not the thematic tree,
-should be the primary navigation --- and what the 4:00p Practice step should
-open.}
+\prompt{Future consideration should be made to decide whether information should be organized in a temporal or thematic axes.}
 
 % ------ the per-tier-0, per-page audit ------
 \input{vertical}
@@ -181,37 +178,28 @@ open.}
 Collapse the sprawl into five tabs.
 
 \begin{enumerate}
-  \item \textbf{Today} --- weather for \emph{four} windows: this morning, this
-    afternoon, next morning, next afternoon (fixing the doubles gap).
+  \item \textbf{Today} --- weather for \emph{four} windows: this morning, this afternoon, next morning, next afternoon (fixing the doubles gap).
   \item \textbf{Upcoming.}
-  \item \textbf{Athletes} --- see the athlete-page layout below.
+  \item \textbf{Team} --- see the athlete-page layout below.
   \item \textbf{Recruiting.}
   \item \textbf{Settings.}
 \end{enumerate}
 
 \subsubsection{The athlete page (three tiers, top to bottom)}
 \begin{description}[leftmargin=0em,style=nextline,itemsep=3pt]
-  \item[Identity (top, glanceable).] Name, gender, class, hometown, MileSplit
-    and Athletic.net links, and PRs.
-  \item[Secondary.] Attendance / training log, past and current injuries,
-    upcoming registered events (date, name, event), training paces.
+  \item[Identity (top, glanceable).] Name, gender, class, hometown, MileSplit and Athletic.net links, and PRs.
+  \item[Secondary.] Attendance / training log, past and current injuries, upcoming registered events (date, name, event), training paces.
   \item[Advanced analytics (bottom).] The learned attribute models:
     \begin{itemize}
-      \item \textbf{Hill Resilience} --- is the runner better on flat or hilly
-        courses? Built from course-elevation learning, MileSplit course
-        rankings, FloRatings A/B/C/D, TullyRunners speed ratings, joshm.dev's
-        Crystal Springs Pace Factor, and the golf-slope-rating analog.
-      \item \textbf{Weather Impact} --- how much adverse weather degrades this
-        runner. The constraint: exact per-race time is needed, and getting it at
-        scale from Athletic.net is not viable (see \S\ref{sec:platform}).
+      \item \textbf{Hill Resilience} --- is the runner better on flat or hilly courses? Built from course-elevation learning, MileSplit course rankings, FloRatings A/B/C/D, TullyRunners speed ratings, joshm.dev's Crystal Springs Pace Factor, and the golf-slope-rating analog.
+      \item \textbf{Weather Impact} --- how much adverse weather degrades this runner. The constraint: exact per-race time is needed, and getting it at scale from Athletic.net is not viable (see \S\ref{sec:platform}).
       \item Additional analytical models as desired.
     \end{itemize}
 \end{description}
 
 \subsection{Wording}
 
-Much of the copy reads as too cute, too artsy, or too AI-generated, and should
-be plainer. Examples:
+Much of the copy reads as too cute, too artsy, or too AI-generated, and should be plainer. Examples:
 
 \begin{center}
 \small
@@ -219,10 +207,8 @@ be plainer. Examples:
 \toprule
 \textbf{Current} & \textbf{Plainer}\\
 \midrule
-``One line from an athlete at 3:47 is worth more than finding out at 4:10 in the
-parking lot.'' & Cut, or state the actual point.\\[4pt]
-``Where your attention goes'' --- ``ranked, and every name is a door.'' & ``Needs
-a look,'' with names that link.\\[4pt]
+``One line from an athlete at 3:47 is worth more than finding out at 4:10 in the parking lot.'' & Cut, or state the actual point.\\[4pt]
+``Where your attention goes'' --- ``ranked, and every name is a door.'' & ``Needs a look,'' with names that link.\\[4pt]
 ``Yesterday, rolled up'' & ``Yesterday, summarized.''\\
 \bottomrule
 \end{tabular}
