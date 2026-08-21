@@ -92,15 +92,31 @@
     with the coach deciding how much the athlete is asked to do.
 \end{itemize}
 
-\subsection*{Technical Needs}
-\begin{itemize}
+\subsection*{Next Steps (ordered)}
+\begin{enumerate}
+  \item \textbf{Restructure the hub into the five-tab layout} of
+    \S\ref{sec:proposal} --- Today, Upcoming, Team, Recruiting (v2), Settings
+    --- with the athlete page reached through Team $\to$ Roster or Team $\to$
+    Results rather than as its own tab.
   \item \textbf{Athlete objects with histories and attributes.} Each athlete
     carries a history (race and training paces over time) \emph{and} a set of
     learned attributes --- e.g.\ ``performs better on hilly courses,''
     ``degrades more in rain / heat.'' These attributes are estimated from data,
     they change as more data arrives, and the set will grow. The data platform
-    exists to populate and keep refreshing them.
-\end{itemize}
+    (\S\ref{sec:platform}) exists to populate and keep refreshing them.
+  \item \textbf{Text-to-structured-workout parsing.} The planner grid must turn
+    ``2 mile wu, 5 tempo, 3 cd'' into a structured workout that can be analyzed
+    post hoc; the current parser misreads such inputs (see the Planner and
+    Workout planner audits).
+  \item \textbf{Weather upgrade.} Move the adjustment metric from dew point to
+    wet-bulb globe temperature, and show conditions for four windows --- this
+    morning / afternoon, next morning / afternoon --- to cover doubles.
+  \item \textbf{Data \& enrichment platform build-out} (\S\ref{sec:platform}):
+    divest from Athletic.net; per-race time, weather, and hill enrichment
+    feeding the learned attributes.
+  \item \textbf{Recruiting} --- a \emph{v2 product}. Reserved in the tab
+    structure but not built in v1.
+\end{enumerate}
 
 \vspace{0.4em}
 \hrule height 0.4pt
@@ -174,21 +190,80 @@ Adjust & Week wall & The Roster\\
 
 % ------ the proposal + wording (retained) ------
 \subsection{Proposed structure: five main tabs}
+\label{sec:proposal}
 
-Collapse the sprawl into five tabs.
+Collapse the sprawl into five tabs. This is a first pass, assembled from the
+per-page recommendations above.
 
 \begin{enumerate}
-  \item \textbf{Today} --- weather for \emph{four} windows: this morning, this afternoon, next morning, next afternoon (fixing the doubles gap).
-  \item \textbf{Upcoming.}
-  \item \textbf{Team} --- see the athlete-page layout below.
-  \item \textbf{Recruiting.}
-  \item \textbf{Settings.}
+  \item \textbf{Today} --- the landing page. Keeps what the current Today page
+    gets right (the plan, with the print option easy to reach) and adds what
+    the audit calls for: a ``most recent session'' module (from Session
+    review), the needs-a-look flags, and practice conditions for \emph{four}
+    windows --- this morning, this afternoon, next morning, next afternoon
+    (fixing the doubles gap). Every widget collapsible, and the widget set
+    coach-customizable.
+  \item \textbf{Upcoming} --- planning, anchored by the Planner (day / week /
+    training block) with the Workout planner as its zoomed-in day view.
+    Absorbs race plans (from Team board) and the Plan \& Goals material
+    currently inside Volume.
+  \item \textbf{Team} --- a team landing page (name, picture,
+    conference/division information, the team document, and the Operations
+    material), with routes into:
+    \begin{itemize}
+      \item \textbf{Roster} --- the public-roster-style list; selecting an
+        athlete opens their page (layout below);
+      \item \textbf{Results} --- the central results repository (by meet,
+        season progression, record board, courses), where every athlete name
+        links to that athlete's page;
+      \item \textbf{PRs / season progression} views.
+    \end{itemize}
+    The athlete page is deliberately \emph{not} a top-level tab: the two
+    routes converge on it (Figure~\ref{fig:teamflow}), so a coach reaches the
+    same athlete object whether they come through the roster or through a
+    result.
+  \item \textbf{Recruiting} --- reserved as a tab, but a \emph{v2 product};
+    not built in v1. (Recruit-visit mode --- masking athlete names --- ships
+    in v1 under Settings.)
+  \item \textbf{Settings} --- the standardized menu the Housekeeping audit
+    calls for: data importation (Data health), team / coach / program
+    settings, the workout planner rules, Parameters and Predictions, bulk
+    import/export, recruit-visit mode, and the feature toggles (turn modules
+    such as 1-on-1 tracking on or off).
 \end{enumerate}
 
-\subsubsection{The athlete page (three tiers, top to bottom)}
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[font=\small,
+  tabnode/.style={draw=kailoaccent,fill=kailosoft,rounded corners=2pt,
+    align=center,inner sep=5pt},
+  leaf/.style={draw=kailorule,fill=white,rounded corners=2pt,
+    align=center,inner sep=4pt},
+  athnode/.style={draw=kailoink,fill=boxbg,rounded corners=2pt,
+    align=center,inner sep=5pt},
+  arr/.style={-{Stealth[length=1.6mm]},kailoink}]
+  \node[tabnode] (team) at (0,0) {\textbf{Team}\\{\scriptsize landing page}};
+  \node[leaf] (roster)  at (3.6, 1.15) {Roster};
+  \node[leaf] (prs)     at (3.6, 0)    {PRs / progression};
+  \node[leaf] (results) at (3.6,-1.15) {Results};
+  \node[athnode] (ath)  at (8.2, 0)    {\textbf{Athlete page}};
+  \draw[arr] (team) -- (roster);
+  \draw[arr] (team) -- (prs);
+  \draw[arr] (team) -- (results);
+  \draw[arr] (roster)  -- (ath)
+    node[midway,above,sloped,font=\scriptsize]{select athlete};
+  \draw[arr] (results) -- (ath)
+    node[midway,below,sloped,font=\scriptsize]{click a name};
+\end{tikzpicture}
+\caption{The Team tab. The athlete page is secondary: reached via the roster
+or by clicking a name in any result --- both routes land on the same object.}
+\label{fig:teamflow}
+\end{figure}
+
+\subsubsection{The athlete page (reached via Roster or Results; three tiers, top to bottom)}
 \begin{description}[leftmargin=0em,style=nextline,itemsep=3pt]
-  \item[Identity (top, glanceable).] Name, gender, class, hometown, MileSplit and Athletic.net links, and PRs.
-  \item[Secondary.] Attendance / training log, past and current injuries, upcoming registered events (date, name, event), training paces.
+  \item[Identity (top, glanceable).] Name, gender, class, hometown, MileSplit and Athletic.net links, and PRs --- the public-roster feel the audit of the current Athlete page calls for.
+  \item[Secondary.] Recent race results, recent training (a week-over-week mileage graph), attendance / training log, past and current injuries, upcoming registered events (date, name, event), training paces, and stated goals. Person-file material (dietary restrictions, class schedules, paperwork) stays populated further down; anything duplicated elsewhere (e.g.\ 1-on-1 notes) becomes a link, not a repeated widget.
   \item[Advanced analytics (bottom).] The learned attribute models:
     \begin{itemize}
       \item \textbf{Hill Resilience} --- is the runner better on flat or hilly courses? Built from course-elevation learning, MileSplit course rankings, FloRatings A/B/C/D, TullyRunners speed ratings, joshm.dev's Crystal Springs Pace Factor, and the golf-slope-rating analog.
