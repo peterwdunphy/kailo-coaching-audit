@@ -9,6 +9,8 @@
 \usepackage{xcolor}
 \usepackage{enumitem}
 \usepackage{booktabs}
+\usepackage{float}
+\usepackage{array}
 \usepackage{titlesec}
 \usepackage{tikz}
 \usetikzlibrary{positioning,arrows.meta,shapes.geometric,backgrounds,fit,calc,chains}
@@ -277,26 +279,34 @@ the object the rest of the product hangs off.
 \subsubsection{Today}
 
 The landing page answers ``what do I need to know before practice'' in one
-screen (Figure~\ref{fig:todaywire}):
+screen. Figure~\ref{fig:todaywire} is the \emph{default} layout --- every slot
+on it is a pick from the widget catalog below, so two coaches' Today pages
+need not look alike.
 
 \begin{itemize}
-  \item \textbf{Glance row} --- uploaded yesterday, available today, data
-    flags / gone quiet, needs a look (the renamed ``Where your attention
-    goes''), each a compact tile whose names link.
-  \item \textbf{Conditions strip} --- \emph{four} windows (this morning, this
-    afternoon, tomorrow morning, tomorrow afternoon) so doubles are covered,
-    computed on wet-bulb globe temperature rather than dew point.
-  \item \textbf{Today's plan} --- with the print option kept one click away.
+  \item \textbf{Greeting line} --- ``Good morning, Coach. Today is Tuesday,
+    September 8.'' Time-of-day aware. The salutation, the name, and what
+    follows the date (season day count, days to the next race, nothing) are
+    all fields the coach sets.
+  \item \textbf{Glance row} --- four small slots. The default four are
+    uploaded yesterday, athletes available today, data flags / gone quiet,
+    and needs a look; any slot can be swapped for another glance widget ---
+    days until the next race, paperwork outstanding, team mileage against
+    plan (Table~\ref{tab:glance}).
+  \item \textbf{Conditions strip} --- four windows (this morning, this
+    afternoon, tomorrow morning, tomorrow afternoon) so doubles are covered.
+    The \emph{model} behind workout adjustments is wet-bulb globe
+    temperature, but WBGT is a poor thing to show a coach. Each window
+    displays temperature, a conditions icon (sun / cloud / rain),
+    precipitation chance, and humidity; the WBGT-derived flag surfaces only
+    as the window's colour.
+  \item \textbf{Today's plan} --- the print option kept one click away.
   \item \textbf{Most recent session} --- the Session review material as a
     module, with historical sessions reachable from it.
   \item \textbf{Tasks} --- the task organizer from Tasks + Links as a widget.
 \end{itemize}
 
-Every widget is collapsible; the widget set and its order are per-coach.
-Build order: the widget framework (collapse + persistence) first, then the
-conditions strip, then the recent-session module.
-
-\begin{figure}[h]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[x=1mm,y=1mm,font=\scriptsize,
   wid/.style={draw=kailorule,fill=white,rounded corners=1pt,align=center,
@@ -304,28 +314,122 @@ conditions strip, then the recent-session module.
   cond/.style={draw=kailoaccent,fill=kailosoft,rounded corners=1pt,
     align=center,inner sep=1pt},
   hint/.style={draw=promptgray,dashed,rounded corners=1pt,align=center,
-    inner sep=1pt}]
-  \draw[draw=kailoink,rounded corners=2pt] (0,0) rectangle (120,64);
-  \node[wid,minimum width=27mm,minimum height=9mm] at (16,58)  {uploaded\\yesterday};
-  \node[wid,minimum width=27mm,minimum height=9mm] at (45,58)  {available\\today};
-  \node[wid,minimum width=27mm,minimum height=9mm] at (74,58)  {data flags /\\gone quiet};
-  \node[wid,minimum width=27mm,minimum height=9mm] at (103,58) {needs a look};
-  \node[cond,minimum width=114mm,minimum height=9mm] at (60,46.5)
-    {\textbf{conditions (WBGT)}: this morning $\mid$ this afternoon $\mid$
-     tomorrow morning $\mid$ tomorrow afternoon};
-  \node[wid,minimum width=56mm,minimum height=30mm] at (31,24.5)
+    inner sep=1pt},
+  sz/.style={font=\tiny,color=promptgray,anchor=north east,inner sep=1.2pt}]
+  \draw[draw=kailoink,rounded corners=2pt] (0,0) rectangle (120,76);
+  \node[anchor=west,font=\scriptsize,text width=112mm,align=left,inner sep=0pt] at (3,71.5)
+    {\textbf{Good morning, Coach.} Today is Tuesday, September 8
+     {\tiny\color{promptgray}\ $\cdot$ day 34 $\cdot$ HCAC in 26 days}};
+  \node[wid,minimum width=27mm,minimum height=9mm] (g1) at (16,62)  {\textbf{14 / 77}\\uploaded yesterday};
+  \node[wid,minimum width=27mm,minimum height=9mm] (g2) at (45,62)  {\textbf{71}\\available today};
+  \node[wid,minimum width=27mm,minimum height=9mm] (g3) at (74,62)  {\textbf{3}\\gone quiet};
+  \node[wid,minimum width=27mm,minimum height=9mm] (g4) at (103,62) {\textbf{5}\\needs a look};
+  \foreach \n in {g1,g2,g3,g4} \node[sz] at (\n.north east) {S};
+  \node[cond,minimum width=27mm,minimum height=13mm] (c1) at (16,47.5)
+    {this morning\\\textbf{58$^{\circ}$F} $\cdot$ sun\\rain 10\% $\cdot$ hum.\ 72\%};
+  \node[cond,minimum width=27mm,minimum height=13mm,fill=kailowarn!15,draw=kailowarn] (c2) at (45,47.5)
+    {this afternoon\\\textbf{84$^{\circ}$F} $\cdot$ sun\\rain 5\% $\cdot$ hum.\ 48\%};
+  \node[cond,minimum width=27mm,minimum height=13mm] (c3) at (74,47.5)
+    {tomorrow morning\\\textbf{61$^{\circ}$F} $\cdot$ cloud\\rain 40\% $\cdot$ hum.\ 80\%};
+  \node[cond,minimum width=27mm,minimum height=13mm] (c4) at (103,47.5)
+    {tomorrow afternoon\\\textbf{72$^{\circ}$F} $\cdot$ rain\\rain 70\% $\cdot$ hum.\ 85\%};
+  \foreach \n in {c1,c2,c3,c4} \node[sz] at (\n.north east) {S};
+  \node[wid,minimum width=56mm,minimum height=30mm] (plan) at (31,24)
     {\textbf{today's plan}\\{\color{promptgray}[print]}};
-  \node[wid,minimum width=57mm,minimum height=15mm] at (88.5,32)
+  \node[sz] at (plan.north east) {L};
+  \node[wid,minimum width=57mm,minimum height=14mm] (sess) at (88.5,32)
     {\textbf{most recent session}\\{\color{promptgray}(from Session review)}};
-  \node[wid,minimum width=57mm,minimum height=13mm] at (88.5,16)
+  \node[sz] at (sess.north east) {M};
+  \node[wid,minimum width=57mm,minimum height=14mm] (tasks) at (88.5,16)
     {\textbf{tasks}\\{\color{promptgray}(from Tasks + Links)}};
-  \node[hint,minimum width=114mm,minimum height=6mm] at (60,4.8)
-    {\itshape every widget collapsible --- set and order per-coach};
+  \node[sz] at (tasks.north east) {M};
+  \node[hint,minimum width=114mm,minimum height=5.5mm] at (60,4.5)
+    {\itshape default layout --- every slot swappable, every widget collapsible, S / M / L sizes};
 \end{tikzpicture}
-\caption{Today as one screen. The glance row links to people; conditions
-cover four windows so doubles are never blind.}
+\caption{Today, default layout. The glance row is four swappable slots; the
+conditions strip shows what a coach reads (temperature, icon, rain,
+humidity) while WBGT drives only the window's colour --- the afternoon here
+is flagged. Corner letters are widget sizes.}
 \label{fig:todaywire}
 \end{figure}
+
+\paragraph{Widgets come in three sizes.} Following the Apple widget model: a
+\textbf{glance} (S) widget is one number or flag in a 1$\times$1 tile; a
+\textbf{medium} (M) widget is 2$\times$1 and holds a short list or a compact
+chart; a \textbf{large} (L) widget is 2$\times$2 and holds a real chart or a
+rich panel. The page is a grid the coach arranges --- add, remove, reorder,
+and resize where a widget supports two sizes. Some widgets are text, some
+are numbers, some are charts; the catalog marks which, and the point of the
+chart widgets is that the coach never has to assemble a graph by hand.
+
+\begin{table}[tbp]
+\centering\small
+\begin{tabular}{@{}p{0.26\linewidth}p{0.54\linewidth}>{\raggedright\arraybackslash}p{0.12\linewidth}@{}}
+\toprule
+\textbf{Glance widget (S)} & \textbf{Shows} & \textbf{Type}\\
+\midrule
+Uploaded yesterday & $n$ of $N$ athletes with a synced activity & count\\
+Available today & athletes cleared to practice & count\\
+Data flags / gone quiet & athletes with no upload in $k$ days & count, links\\
+Needs a look & activities flagged abnormal (HR high on easy, distance off plan) & count, links\\
+Days until next race & countdown plus the meet name & number\\
+Season day & ``day 34 of 112'' or weeks to the championship & number\\
+Injured / training room & athletes on a modified plan & count, links\\
+Paperwork outstanding & missing clearances & count, links\\
+Team mileage vs.\ plan & this week's volume as a percent of planned & percent\\
+Check-ins missing & surveys or check-ins not returned & count\\
+Conditions flag & today's WBGT band as a colour & flag\\
+Entry deadline & next meet's entry cutoff & date\\
+Readiness alerts & sleep / HRV outside the athlete's band (when connected) & count\\
+Birthdays this week & --- & short list\\
+\bottomrule
+\end{tabular}
+\caption{Glance widgets: candidates for the four small slots.}
+\label{tab:glance}
+\end{table}
+
+\begin{table}[tbp]
+\centering\small
+\begin{tabular}{@{}p{0.26\linewidth}p{0.54\linewidth}>{\raggedright\arraybackslash}p{0.12\linewidth}@{}}
+\toprule
+\textbf{Medium widget (M)} & \textbf{Shows} & \textbf{Type}\\
+\midrule
+Today's plan (compact) & the session by group, with print & text\\
+Conditions strip & the four windows & text + icons\\
+Needs a look (list) & the names behind the glance count, each linked & list\\
+Most recent session & who did what against plan, in a paragraph & text\\
+Upcoming meets & the next three: date, meet, entries due & list\\
+Tasks & the organizer & list\\
+Team weekly mileage & eight-week sparkline, planned vs.\ actual & chart\\
+Pace groups today & who runs with whom, at what pace & list\\
+Training load & acute:chronic ratio per group, as bars & chart\\
+Weather trend & 48-hour temperature and precipitation line & chart\\
+Recent PRs & PRs from the last meet & list\\
+Inbox & athlete messages and notes since yesterday & list\\
+\midrule
+\textbf{Large widget (L)} & \textbf{Shows} & \textbf{Type}\\
+\midrule
+Weekly mileage with CIs & team median weekly volume with an IQR band, planned volume overlaid; per-group toggle & chart\\
+Session review & the most recent workout, prescribed vs.\ actual splits per athlete & table + chart\\
+Week at a glance & Mon--Sun plan strip, today highlighted & calendar\\
+Attendance heatmap & athlete $\times$ day, last four weeks & heatmap\\
+Readiness grid & athlete $\times$ (sleep, HRV, load) as traffic lights & grid\\
+Last meet results & team score, top finishers, PR count & table\\
+Planned vs.\ actual pace & one dot per athlete for the last workout, with a CI band & chart\\
+Training load timeline & team ACWR over the season, injuries marked & chart\\
+Next race preview & course profile and the forecast for the race window & chart + text\\
+Progression & selected athletes' 5k-equivalent over the season & chart\\
+\bottomrule
+\end{tabular}
+\caption{Medium and large widgets. Chart widgets are rendered by the product,
+never assembled by the coach.}
+\label{tab:widgets}
+\end{table}
+
+Build order: the widget framework (grid, collapse, persistence) first, since
+everything else on the page is a widget; then the conditions strip; then the
+recent-session module; then the catalog grows one widget at a time, charts
+last.
 
 \subsubsection{Upcoming}
 
@@ -372,6 +476,50 @@ pages.}
 \label{fig:zoom}
 \end{figure}
 
+Figure~\ref{fig:upcomingwire} is the week zoom as a coach would see it: the
+zoom selector across the top, a text entry per day with the parsed structure
+shown beneath it, the race day highlighted, and the block-level context
+(week of the block, volume target, race plan status) in a rail below.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1mm,y=1mm,font=\tiny,
+  tab/.style={draw=kailorule,fill=white,rounded corners=1pt,inner sep=2pt},
+  tabon/.style={draw=kailoaccent,fill=kailosoft,rounded corners=1pt,inner sep=2pt},
+  dayc/.style={draw=kailorule,fill=white,rounded corners=1pt,align=center,
+    text width=14mm,inner sep=1.5pt,minimum height=27mm,anchor=north},
+  racec/.style={dayc,draw=kailowarn,fill=kailowarn!12},
+  rail/.style={draw=kailorule,fill=boxbg,rounded corners=1pt,align=left,
+    inner sep=2pt,anchor=west}]
+  \draw[draw=kailoink,rounded corners=2pt] (0,0) rectangle (120,64);
+  \node[tab]   at (9,59.5)  {Block};
+  \node[tabon] at (20,59.5) {\textbf{Week}};
+  \node[tab]   at (30,59.5) {Day};
+  \node[tab]   at (42,59.5) {Preview};
+  \node[anchor=east,font=\scriptsize] at (117,59.5)
+    {\textbf{Week of Sep 7--13} {\color{promptgray}$\cdot$ block week 6 of 12}};
+  \node[dayc] at (10.5,54)  {\textbf{Mon 7}\\[2pt]Easy 45 min\\[2pt]{\color{kailoaccent}easy $\cdot$ 45$'$}};
+  \node[dayc] at (26.5,54)  {\textbf{Tue 8}\\[2pt]2 mi wu, 5 tempo, 3 cd\\[2pt]{\color{kailoaccent}wu 2 $\cdot$ T 5 $\cdot$ cd 3}};
+  \node[dayc] at (42.5,54)  {\textbf{Wed 9}\\[2pt]Easy 60 min + strides\\[2pt]{\color{kailoaccent}easy $\cdot$ 60$'$ $\cdot$ 6 st}};
+  \node[dayc] at (58.5,54)  {\textbf{Thu 10}\\[2pt]6$\times$1000 @ 5k, 2$'$ jog\\[2pt]{\color{kailoaccent}6$\times$1000 @ 5k $\cdot$ r 2$'$}};
+  \node[dayc] at (74.5,54)  {\textbf{Fri 11}\\[2pt]Easy 30 min\\[2pt]{\color{kailoaccent}easy $\cdot$ 30$'$}};
+  \node[racec] at (90.5,54) {\textbf{Sat 12}\\[2pt]\textbf{RACE}\\HCAC Preview 8K\\[2pt]{\color{kailowarn}race plan $\cdot$ 12 set}};
+  \node[dayc] at (106.5,54) {\textbf{Sun 13}\\[2pt]Long run 90 min\\[2pt]{\color{kailoaccent}long $\cdot$ 90$'$}};
+  \node[rail,text width=54mm] at (3,16.5)
+    {\textbf{Plan \& goals} --- target 62 mi this week $\cdot$ peak 70 mi
+     $\cdot$ down-week next {\color{promptgray}(from Volume)}};
+  \node[rail,text width=53mm] at (61,16.5)
+    {\textbf{Race plan: HCAC Preview} --- goals set for 12 of 14 entrants $\cdot$
+     predicted pace ranges ready {\color{promptgray}(from Team board)}};
+  \node[anchor=west,color=promptgray,font=\tiny,text width=112mm,align=left,inner sep=0pt] at (3,5)
+    {\itshape text typed in a day becomes the structured line beneath it; click a day for the Day zoom, Preview for the athlete's view};
+\end{tikzpicture}
+\caption{Upcoming, week zoom. Each day's free-text entry is parsed into the
+structured workout shown under it (the load-bearing technical piece); the
+race day carries its race-plan status; the rail holds the block context.}
+\label{fig:upcomingwire}
+\end{figure}
+
 \subsubsection{Team}
 
 A team landing page --- name, picture, conference/division information, the
@@ -412,6 +560,72 @@ line, PR board entry --- opens the same athlete page.
 roster, the PR / progression boards, or any result line --- all three
 converge on the same object. Operations stays team-level.}
 \label{fig:teamflow}
+\end{figure}
+
+Figure~\ref{fig:teamwire} is the landing page with Rose-Hulman Institute of
+Technology as the example: an identity header (mark, name, location, current
+season, head coach, conference and division), then a stack of blocks ---
+coaches, athletes, results, PRs, schedule, operations --- each of which opens
+its route. The block order is the coach's: the handles on the left move a
+block up or down, so a coach who wants the roster first and the staff list
+last gets exactly that.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1mm,y=1mm,font=\scriptsize,
+  hdr/.style={draw=kailorule,fill=boxbg,rounded corners=1pt,anchor=north west,inner sep=0pt},
+  blk/.style={draw=kailorule,fill=white,rounded corners=1pt,anchor=north west,inner sep=0pt},
+  handle/.style={font=\tiny,color=promptgray,anchor=west,inner sep=0pt},
+  route/.style={font=\tiny,color=kailoaccent,anchor=east,inner sep=0pt}]
+  \draw[draw=kailoink,rounded corners=2pt] (0,0) rectangle (120,96);
+  % ---- identity header
+  \node[hdr,minimum width=114mm,minimum height=22mm] (h) at (3,93) {};
+  \node[anchor=north west,inner sep=0pt] at (5,91.5)
+    {\includegraphics[width=18mm]{fig/rhit_logo.png}};
+  \node[anchor=north west,inner sep=0pt,align=left] at (26,91)
+    {{\normalsize\bfseries Rose-Hulman Institute of Technology}\\[2pt]
+     Terre Haute, Indiana\\[1pt]
+     \textbf{Cross Country $\cdot$ Fall 2026}\\[1pt]
+     Head coach: Derick Lawrence\\[1pt]
+     HCAC $\cdot$ NCAA Division III};
+  % ---- coaches block (expanded)
+  \node[blk,minimum width=114mm,minimum height=24mm] (b1) at (3,69) {};
+  \node[handle] at (4.5,67) {$\uparrow\downarrow$};
+  \node[anchor=west,inner sep=0pt] at (9,67) {\textbf{Coaches}};
+  \node[route] at (115,67) {collapse $\wedge$};
+  \node[anchor=north west,inner sep=0pt] at (9,64.5) {\setlength{\tabcolsep}{2pt}\tiny
+    \begin{tabular}{@{}>{\tiny\raggedright\arraybackslash}p{22mm}>{\tiny\raggedright\arraybackslash}p{33mm}>{\tiny\raggedright\arraybackslash}p{31mm}>{\tiny\raggedright\arraybackslash}p{17mm}@{}}
+      \textbf{Name} & \textbf{Title} & \textbf{Email} & \textbf{Phone}\\[1pt]
+      Derick Lawrence & Head Men's \& Women's Cross Country / Assistant Track \& Field Coach & lawrenc1@rose-hulman.edu & (812) 877-8246\\[2pt]
+      Shane Mills & Head Men's \& Women's Track \& Field / Assistant Cross Country Coach & mills2@rose-hulman.edu & (812) 877-8051\\
+    \end{tabular}};
+  % ---- collapsed blocks
+  \node[blk,minimum width=114mm,minimum height=7mm] (b2) at (3,43) {};
+  \node[handle] at (4.5,39.5) {$\uparrow\downarrow$};
+  \node[anchor=west,inner sep=0pt] at (9,39.5) {\textbf{Athletes} {\color{promptgray}$\cdot$ 77 on the roster $\cdot$ 56 men, 21 women}};
+  \node[route] at (115,39.5) {Roster $\rightarrow$};
+  \node[blk,minimum width=114mm,minimum height=7mm] (b3) at (3,35) {};
+  \node[handle] at (4.5,31.5) {$\uparrow\downarrow$};
+  \node[anchor=west,inner sep=0pt] at (9,31.5) {\textbf{Results} {\color{promptgray}$\cdot$ last: NCAA Division III Championships, Nov 22, 2025}};
+  \node[route] at (115,31.5) {Results $\rightarrow$};
+  \node[blk,minimum width=114mm,minimum height=7mm] (b4) at (3,27) {};
+  \node[handle] at (4.5,23.5) {$\uparrow\downarrow$};
+  \node[anchor=west,inner sep=0pt] at (9,23.5) {\textbf{PRs / progression} {\color{promptgray}$\cdot$ record board, season progression}};
+  \node[route] at (115,23.5) {Boards $\rightarrow$};
+  \node[blk,minimum width=114mm,minimum height=7mm] (b5) at (3,19) {};
+  \node[handle] at (4.5,15.5) {$\uparrow\downarrow$};
+  \node[anchor=west,inner sep=0pt] at (9,15.5) {\textbf{Schedule} {\color{promptgray}$\cdot$ next meet, entries due, .ics}};
+  \node[route] at (115,15.5) {Schedule $\rightarrow$};
+  \node[blk,minimum width=114mm,minimum height=7mm] (b6) at (3,11) {};
+  \node[handle] at (4.5,7.5) {$\uparrow\downarrow$};
+  \node[anchor=west,inner sep=0pt] at (9,7.5) {\textbf{Operations} {\color{promptgray}$\cdot$ money, equipment, travel}};
+  \node[route] at (115,7.5) {Operations $\rightarrow$};
+\end{tikzpicture}
+\caption{The Team landing page, Rose-Hulman as the example. The Coaches block
+is shown expanded; the rest are collapsed rows that open their route. The
+$\uparrow\downarrow$ handles reorder blocks. Roster counts are the 2025 XC
+season as held in the data platform.}
+\label{fig:teamwire}
 \end{figure}
 
 \paragraph{The athlete page (three tiers, top to bottom).}
