@@ -92,6 +92,13 @@
     \emph{reduces} the need for athlete buy-in. The less work an athlete has to
     do, the better the product: participation should be near-passive by default,
     with the coach deciding how much the athlete is asked to do.
+  \item \textbf{Highly customizable.} Coaches change the information they see,
+    where it sits, and what it is called --- the layout is theirs, not a
+    template they work around.
+  \item \textbf{Expandable and collapsible.} The system is iterative: a coach
+    can run it as a roster and a workout planner and nothing else, or turn on
+    every analytic layer, and move between those states at will. Some coaches
+    will want all of it and some almost none; both are first-class users.
 \end{itemize}
 
 \subsection*{Next Steps (ordered)}
@@ -285,9 +292,11 @@ need not look alike.
 
 \begin{itemize}
   \item \textbf{Greeting line} --- ``Good morning, Coach. Today is Tuesday,
-    September 8.'' Time-of-day aware. The salutation, the name, and what
-    follows the date (season day count, days to the next race, nothing) are
-    all fields the coach sets.
+    September 8 $\cdot$ XC day 34.'' Time-of-day aware. The salutation, the
+    name, and what follows the date (season day count, days to the next race,
+    nothing) are all fields the coach sets. The day count is \emph{sport}-
+    specific --- ``XC day 34,'' ``Indoor day 12,'' ``Outdoor day 40'' --- never
+    a generic day number, since a program runs three seasons a year.
   \item \textbf{Glance row} --- four small slots. The default four are
     uploaded yesterday, athletes available today, data flags / gone quiet,
     and needs a look; any slot can be swapped for another glance widget ---
@@ -319,7 +328,7 @@ need not look alike.
   \draw[draw=kailoink,rounded corners=2pt] (0,0) rectangle (120,76);
   \node[anchor=west,font=\scriptsize,text width=112mm,align=left,inner sep=0pt] at (3,71.5)
     {\textbf{Good morning, Coach.} Today is Tuesday, September 8
-     {\tiny\color{promptgray}\ $\cdot$ day 34 $\cdot$ HCAC in 26 days}};
+     {\tiny\color{promptgray}\ $\cdot$ XC day 34 $\cdot$ HCAC in 26 days}};
   \node[wid,minimum width=27mm,minimum height=9mm] (g1) at (16,62)  {\textbf{14 / 77}\\uploaded yesterday};
   \node[wid,minimum width=27mm,minimum height=9mm] (g2) at (45,62)  {\textbf{71}\\available today};
   \node[wid,minimum width=27mm,minimum height=9mm] (g3) at (74,62)  {\textbf{3}\\gone quiet};
@@ -373,7 +382,7 @@ Available today & athletes cleared to practice & count\\
 Data flags / gone quiet & athletes with no upload in $k$ days & count, links\\
 Needs a look & activities flagged abnormal (HR high on easy, distance off plan) & count, links\\
 Days until next race & countdown plus the meet name & number\\
-Season day & ``day 34 of 112'' or weeks to the championship & number\\
+Season day & ``XC day 34 of 112'' --- counted within the current sport season (XC / indoor / outdoor), or weeks to the championship & number\\
 Injured / training room & athletes on a modified plan & count, links\\
 Paperwork outstanding & missing clearances & count, links\\
 Team mileage vs.\ plan & this week's volume as a percent of planned & percent\\
@@ -451,10 +460,59 @@ preview (Athlete day as a ``preview'' button, not a destination).
     links; the paces themselves live on the athlete page.
 \end{itemize}
 
-Build order: the four-zoom shell around the existing planner first; the text
-parser next; the race-plan predictive layer last.
+\paragraph{Editing a day in place.} Clicking a day --- ``Mon 7'' --- opens that
+day for editing directly, without leaving the week (Figure~\ref{fig:dayedit}).
+The pop-up holds the text entry, the structure the parser made of it, and the
+\textbf{variants by attribute}: the same session prescribed differently to
+different groups. ``5 tempo'' for varsity boys, ``4 tempo'' for varsity girls
+and JV boys, ``3 tempo'' for JV girls is one workout with four variants, not
+four workouts, and the coach writes it once. Variants key on roster
+attributes (gender, varsity / JV, pod --- see the Team section), and pods for
+the day are proposed from the pod settings: the coach can force the number
+of pods, the number of athletes per pod, and whether pods are mixed- or
+single-gender; the product fills them from training paces.
 
-\begin{figure}[h]
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1mm,y=1mm,font=\tiny,
+  card/.style={draw=kailoink,fill=white,rounded corners=2pt},
+  fld/.style={draw=kailorule,fill=boxbg,rounded corners=1pt,anchor=west,inner sep=2pt,text width=96mm,align=left},
+  btn/.style={draw=kailoaccent,fill=kailosoft,rounded corners=1pt,inner sep=2.5pt},
+  btnp/.style={draw=kailoaccent,fill=kailoaccent,text=white,rounded corners=1pt,inner sep=2.5pt}]
+  \draw[card] (0,0) rectangle (106,58);
+  \node[anchor=west,font=\scriptsize] at (3,54.5) {\textbf{Mon, Sep 7} {\color{promptgray}--- edit day}};
+  \node[anchor=east,color=promptgray] at (103,54.5) {$\times$};
+  \node[fld] at (3,48.5) {2 mi wu, 5 tempo, 3 cd};
+  \node[anchor=west] at (3,43.5) {{\color{kailoaccent}parsed:} wu 2 mi $\cdot$ tempo 5 mi @ T pace $\cdot$ cd 3 mi {\color{promptgray}(10 mi)}};
+  \node[anchor=west] at (3,38.5) {\textbf{Variants by attribute}};
+  \node[anchor=north west,inner sep=0pt] at (3,36.5) {\setlength{\tabcolsep}{2.5pt}
+    \begin{tabular}{@{}>{\tiny}p{22mm}>{\tiny}p{34mm}>{\tiny}p{18mm}>{\tiny}p{16mm}@{}}
+      \textbf{group} & \textbf{prescription} & \textbf{pods} & \textbf{athletes}\\[1pt]
+      varsity boys & 2 wu $\cdot$ \textbf{5} tempo $\cdot$ 3 cd & A, B & 14\\
+      varsity girls & 2 wu $\cdot$ \textbf{4} tempo $\cdot$ 3 cd & C & 7\\
+      JV boys & 2 wu $\cdot$ \textbf{4} tempo $\cdot$ 3 cd & D, E & 12\\
+      JV girls & 2 wu $\cdot$ \textbf{3} tempo $\cdot$ 3 cd & F & 6\\
+    \end{tabular}};
+  \node[anchor=west] at (3,17.5) {\textbf{Pods} {\color{promptgray}$\cdot$ proposed from training paces}};
+  \node[btn,anchor=west] at (3,12) {pods: auto $\vee$};
+  \node[btn,anchor=west] at (24,12) {per pod: $\sim$6 $\vee$};
+  \node[btn,anchor=west] at (46,12) {single-gender $\vee$};
+  \node[btn,anchor=west] at (3,5) {Save};
+  \node[btn,anchor=west] at (14,5) {Preview athlete view};
+  \node[btnp,anchor=west] at (46,5) {Push to athletes};
+  \node[anchor=east,color=promptgray] at (103,5) {one workout, four variants};
+\end{tikzpicture}
+\caption{Editing a day in place. One text entry, one parse, and a variant per
+attribute group; pods are proposed from training paces under the coach's pod
+settings (count, size, gender mixing).}
+\label{fig:dayedit}
+\end{figure}
+
+Build order: the four-zoom shell around the existing planner first; the text
+parser next; in-place day editing with attribute variants; the race-plan
+predictive layer last.
+
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[font=\scriptsize,
   hz/.style={draw=kailoaccent,fill=kailosoft,rounded corners=2pt,
@@ -529,6 +587,16 @@ routes (Figure~\ref{fig:teamflow}): the Roster, the Results repository
 Operations (money, equipment, the .ics export of the meet and training
 calendar). Every surface that shows an athlete's name --- roster row, result
 line, PR board entry --- opens the same athlete page.
+
+\paragraph{Roster attributes.} The roster carries, per athlete, the
+attributes the rest of the product keys on: \textbf{gender},
+\textbf{varsity / JV}, and \textbf{pod} (the training-pace group). Pods are
+either set by hand or proposed: the coach chooses the number of pods, or the
+number of athletes per pod, and whether pods are mixed- or single-gender, and
+the product estimates current pods from training paces and recent race marks.
+Workout variants in Upcoming address these attributes directly (``varsity
+girls and JV boys: 4 tempo''), which is why they live on the roster rather
+than in a settings page.
 
 \begin{figure}[h]
 \centering
@@ -639,6 +707,104 @@ season as held in the data platform.}
       \item Additional analytical models as desired.
     \end{itemize}
 \end{description}
+
+Figure~\ref{fig:athletewire} is the page for a real athlete --- Billy Allen,
+a Rose-Hulman sophomore --- built from what the platform already holds:
+headshot and bio from the athletics site, collegiate results from TFRRS, the
+high-school career from MileSplit (his profile found by name and class year),
+and the course-adjusted numbers from the ALS fit of \S\ref{sec:platform}.
+The MileSplit and Athletic.net links are badges in the sites' own marks so a
+coach recognizes them at a glance.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1mm,y=1mm,font=\scriptsize,
+  card/.style={draw=kailorule,fill=white,rounded corners=1pt,anchor=north west,inner sep=0pt},
+  hdr/.style={draw=kailorule,fill=boxbg,rounded corners=1pt,anchor=north west,inner sep=0pt},
+  chip/.style={draw=kailoaccent,fill=kailosoft,rounded corners=1pt,inner sep=1.8pt,font=\tiny},
+  msb/.style={draw=kailorule,fill=white,rounded corners=1pt,inner sep=1.8pt,font=\tiny,anchor=west},
+  anb/.style={draw=kailorule,fill=white,rounded corners=1pt,inner sep=1.8pt,font=\tiny,anchor=west},
+  sec/.style={font=\scriptsize\bfseries,anchor=west,inner sep=0pt},
+  bd/.style={font=\tiny,anchor=north west,inner sep=0pt,align=left}]
+  \draw[draw=kailoink,rounded corners=2pt] (0,6) rectangle (120,118);
+  % ---- identity (top, glanceable)
+  \node[hdr,minimum width=114mm,minimum height=30mm] at (3,115) {};
+  \node[anchor=north west,inner sep=0pt] at (5,113.5) {\includegraphics[height=26mm]{fig/billy_allen.jpg}};
+  \node[anchor=north west,inner sep=0pt,align=left] at (27,113.5)
+    {{\normalsize\bfseries Billy Allen}\\[1.5pt]
+     M $\cdot$ Sophomore (class of 2029) $\cdot$ Arlington Heights, Ill.\\[1pt]
+     John Hersey HS $\cdot$ Electrical Engineering\\[2.5pt]
+     {\tiny \textbf{PRs}\ \ 8K \textbf{29:39.2} $\cdot$ 6K \textbf{22:18.6} $\cdot$ mile (indoor) \textbf{5:12.12}}\\[0.5pt]
+     {\tiny \textbf{HS}\ \ 3200 10:54.04 $\cdot$ 1600 5:08.23 $\cdot$ 3\,mi XC 16:47.1}};
+  \node[chip] at (31,88.5) {varsity};
+  \node[chip] at (43,88.5) {pod B};
+  \node[msb] at (51,88.5) {\includegraphics[height=2.6mm]{fig/milesplit_icon.png}\ \,MileSplit};
+  \node[anb] at (74,88.5) {\tikz\node[circle,fill=kailoaccent,text=white,inner sep=0.6pt,font=\tiny\bfseries]{A};\ \,Athletic.net};
+  % ---- secondary: recent results | training
+  \node[card,minimum width=62mm,minimum height=36mm] at (3,83) {};
+  \node[sec] at (5,80.5) {Recent results};
+  \node[bd] at (5,77.5) {\setlength{\tabcolsep}{2pt}
+    \begin{tabular}{@{}>{\tiny}p{10mm}>{\tiny\raggedright\arraybackslash}p{30mm}>{\tiny}p{9mm}>{\tiny}p{7mm}@{}}
+      \textbf{date} & \textbf{meet} & \textbf{mark} & \textbf{place}\\[0.5pt]
+      Jan 31 & Rose-Hulman Classic, mile & 5:12.12 & 32\\
+      fall '25 & HCAC Championships, 8K & 29:39.2 & 59\\
+      fall '25 & NIKE XC Town Twilight, 8K & 31:00.9 & 78\\
+      Sep 20 & John McNichols Inv., 8K & 30:49.5 & 135\\
+      Aug 29 & Sam Bell Inv., 6K & 22:18.6 & 52\\
+    \end{tabular}};
+  \node[card,minimum width=50mm,minimum height=36mm] at (67,83) {};
+  \node[sec] at (69,80.5) {Training {\color{promptgray}\mdseries\tiny $\cdot$ last 8 weeks}};
+  % mileage sparkline with band
+  \begin{scope}[shift={(70,58)}]
+    \fill[kailosoft] (0,4) -- (6,6) -- (12,7) -- (18,9) -- (24,8) -- (30,11) -- (36,12) -- (42,10)
+      -- (42,14) -- (36,16) -- (30,15) -- (24,12) -- (18,13) -- (12,11) -- (6,10) -- (0,8) -- cycle;
+    \draw[kailoaccent,thick] (0,6) -- (6,8) -- (12,9) -- (18,11) -- (24,10) -- (30,13) -- (36,14) -- (42,12);
+    \draw[kailorule] (0,0) -- (42,0);
+    \node[font=\tiny,anchor=west,color=promptgray] at (0,-2) {weekly miles $\cdot$ 38 $\to$ 52 $\cdot$ band = plan};
+  \end{scope}
+  \node[bd,text width=46mm] at (69,53.5) {attendance 94\% $\cdot$ no current injury $\cdot$ next: HCAC Preview 8K, Sep 12};
+  % ---- advanced analytics (bottom)
+  \node[card,minimum width=114mm,minimum height=36mm] at (3,45) {};
+  \node[sec] at (5,42.5) {Advanced analytics {\color{promptgray}\mdseries\tiny $\cdot$ learned attributes, each an optional widget}};
+  \node[bd,text width=54mm] at (5,39)
+    {\textbf{Course-adjusted baseline} --- 5k-equivalent \textbf{18:26}, from four XC
+     races on courses rated $-0.3\%$ to $+1.6\%$ (ALS course offsets;
+     one course not yet reliably rated).\\[2.5pt]
+     \textbf{Hill resilience} --- \emph{provisional}: $+0.4\%$ vs.\ baseline on the
+     slower-rated courses ($n=2$); needs a full season to separate from fitness
+     gain.\\[2.5pt]
+     \textbf{Weather impact} --- not yet estimable: no per-race start times for
+     his meets (Flash Results coverage pending).};
+  \node[bd,text width=54mm] at (62,39)
+    {\textbf{HS $\to$ college trajectory} --- HS 3-mile 16:47 predicts a first-year
+     8K of 29:1x--29:5x for linked athletes with his profile; actual 29:39
+     (\emph{on track}).\\[2.5pt]
+     \textbf{Critical speed} --- needs three track races at two distances;
+     one mile so far.\\[2.5pt]
+     \textbf{Race prediction} --- HCAC Preview 8K: 29:05--29:45 (course offset
+     $-0.3\%$, forecast 61$^{\circ}$F); pace card at 5:52/mi.};
+\end{tikzpicture}
+\caption{The athlete page for Billy Allen (Rose-Hulman, class of 2029):
+identity tier with PRs and the HS career via the MileSplit link; recent
+results and training in the secondary tier; the learned attributes at the
+bottom, each stating what it needs when it cannot yet be estimated. Bio,
+PRs and results are real (two meet dates are absent from the TFRRS pages
+themselves); the training card, attribute chips, and analytics values are
+illustrative of the output format.}
+\label{fig:athletewire}
+\end{figure}
+
+\paragraph{Analytics that could be added.} Beyond hill resilience and weather
+impact: a \textbf{race-prediction band} per upcoming meet from the baseline,
+course offset and forecast; \textbf{critical speed / D$'$} from track marks;
+\textbf{championship response} (does the athlete run above baseline at
+championships); \textbf{negative-split tendency} from split data where timing
+provides it; \textbf{training response} --- the baseline's movement against
+mileage and workout load, which is the first place the GetFast training data
+joins the results data; \textbf{consistency} (race-to-race variance, which is
+itself a selection signal); and the \textbf{HS $\to$ college trajectory}
+described in \S\ref{sec:platform}, which places a first-year athlete against
+the linked population with the same high-school profile.
 
 Build order: the identity and secondary tiers ship first --- they display
 data already held. The analytics tier lands as the platform models mature

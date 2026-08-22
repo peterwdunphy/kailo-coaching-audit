@@ -7,31 +7,6 @@ to come) are only as good as the data feeding them. This section lays out how
 that data is sourced, enriched, and linked --- and why the platform must
 \textbf{divest fully from Athletic.net} as a scale dependency.
 
-\subsection{The Athletic.net problem}
-
-Athletic.net has the broadest US high-school coverage, and the project was built
-on it. But it is not a trustworthy dependency at scale:
-
-\begin{itemize}
-  \item \textbf{It blocks us.} Cloudflare bot management returns
-    \code{cf-mitigated=challenge} on sustained crawling. Measured over weeks:
-    $\le 1$--2 req/s ran clean for days; 3 req/s drew 24-hour blocks on two
-    consecutive days; volume near 30{,}000 requests/day drew challenges
-    regardless of rate. Exit-node rotation across six IPs did not prevent it ---
-    the block is on the traffic \emph{pattern}, not the address.
-  \item \textbf{No sanctioned access.} No API, no developer program, no
-    data-partnership channel.
-  \item \textbf{The data itself has defects} we must work around --- relay
-    results collapse to one athlete per squad; per-race timestamps are all
-    \code{T00:00:00}, so it cannot supply the race times the Weather Impact
-    model needs anyway.
-\end{itemize}
-
-\assess{Athletic.net stays as a redundancy check and for the states already
-captured, but every \emph{new} pipeline is designed against sources that answer
-reliably --- TFRRS, MileSplit, and static timing archives. The three diagrams
-below are that design.}
-
 % ------------------------------------------------------------ DIAGRAM 1 ---
 \subsection{(1) Roster, meet, and team information}
 
@@ -94,9 +69,16 @@ is demoted to redundancy.}
     (rate-limited, ledger tee). Note the enumeration cap: \code{/teams?state}
     returns at most 999 rows, so the largest states need a per-county or
     meet-harvest route for full coverage.
-  \item \textbf{Divest path.} New states come from MileSplit; existing
-    Athletic.net captures (CA/TX/FL/NY) are retained and merged, but no new crawl
-    depends on that host.
+  \item \textbf{Divest path.} Athletic.net has the broadest US high-school
+    coverage and the project was built on it, but it is not a dependency to
+    scale on: Cloudflare returns \code{cf-mitigated=challenge} on sustained
+    crawling (1--2 req/s ran clean for days; 3 req/s drew 24-hour blocks on
+    consecutive days; exit-node rotation did not help --- the block is on the
+    traffic pattern, not the address), there is no API, developer program or
+    partnership channel, and its rows carry no race times and collapse relays
+    to one athlete per squad. So: new states come from MileSplit; the existing
+    Athletic.net captures (CA/TX/FL/NY) are retained and merged as a redundancy
+    check; no new pipeline depends on that host.
 \end{itemize}
 
 % ------------------------------------------------------------ DIAGRAM 2 ---
@@ -154,15 +136,30 @@ JV and the 3\,pm men's varsity get different windows. Wind for sprints comes
 measured from the results themselves.}
 \end{figure}
 
+\noindent\textbf{Wind is an essential characteristic of a sprint mark.} A 10.90
+at $+3.0$ and a 10.90 at $-1.0$ are different performances, and the rule
+book agrees (marks over $+2.0$\,m/s are not record-legal). For the wind-legal
+events --- 100, 200, the hurdles, long and triple jump --- the measured
+gauge reading is stored on the result row itself (Athletic.net carries it on
+$\sim$9\% of track rows; TFRRS event pages carry a WIND column), and every
+sprint analytic is conditioned on it. Forecast wind from the weather model is
+the fallback for distance events, never a substitute for the gauge on a
+sprint.
+
 \noindent\textbf{Hill / course difficulty} (three complementary signals):
 \begin{enumerate}
   \item \textbf{Empirical ALS course offsets (built).} A two-way log-time model
     --- \(\log(\mathrm{equiv5k}) = \mathrm{ability} + \mathrm{offset}\), i.e.\ an
-    athlete-season term plus a course term --- solved by alternating least
-    squares over athletes who race multiple courses.
-    Validated split-half \(r=0.98\); recovered Crystal Springs $(+72\text{s})$
-    and Woodbridge $(-50\text{s})$ with no external input. It measures what
-    terrain \emph{costs}, but bundles hills with footing and weather.
+    athlete-season term plus a course term. \textbf{ALS} is \emph{alternating
+    least squares}: hold the course offsets fixed and solve each athlete's
+    ability as the least-squares (mean) fit to their races; then hold
+    abilities fixed and solve each course's offset the same way; alternate
+    until nothing moves (400 rounds), with the offsets anchored to mean zero
+    so the split is identified. It needs only athletes who race more than one
+    course. Validated split-half \(r=0.98\); recovered Crystal Springs
+    $(+72\text{s})$ and Woodbridge $(-50\text{s})$ with no external input. It
+    measures what terrain \emph{costs}, but bundles hills with footing and
+    weather.
   \item \textbf{External course ratings (cross-check + decomposition).}
     TullyRunners speed ratings, MileSplit course rankings, FloRatings A/B/C/D,
     joshm.dev Crystal Springs Pace Factor, golf-slope analog. Joining these and
@@ -172,6 +169,53 @@ measured from the results themselves.}
     the DEM give cumulative climb per km --- the only physical hill metric, but
     per-course external data. Reserve for marquee courses.
 \end{enumerate}
+\paragraph{Held-out test on 100 athletes per division.} To check that the
+offsets carry information rather than fit noise, 100 athlete-seasons with at
+least three XC races were drawn at random from each of D1, D2 and D3 (seed
+42), one race per athlete was held out, and the model was re-fit on the
+remaining 619,056 rows (151,239 athlete-seasons, 3,410 meets). For each
+held-out race the question is whether the \emph{course offset} explains what
+the athlete's own baseline cannot (Figure~\ref{fig:alsval},
+Table~\ref{tab:alsval}): the correlation between the athlete's deviation
+from baseline and the course's offset is 0.50--0.76, the prediction error
+falls 20--36\% once the offset is applied, and a permutation null (offsets
+shuffled across the held-out races, 2,000 draws) never reaches the observed
+correlation ($p<0.0005$, null s.d.\ 0.10). D2 is the weakest, consistent
+with its thinner meet overlap.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{fig/als_validation.pdf}
+\caption{Held-out race vs.\ course offset, 100 random athletes per division.
+Each point is one held-out race: $x$ is the course's fitted offset, $y$ is
+how far the athlete ran from their own baseline that day. Points on the
+dashed line are fully explained by the course.}
+\label{fig:alsval}
+\end{figure}
+
+\begin{table}[H]
+\centering\footnotesize
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+ & $n$ & $r$(dev., offset) & $r$ pred. & $r$ base & MAE base & MAE w/ offset\\
+\midrule
+D1 & 100 & 0.76 & 0.98 & 0.95 & 28.4\,s & 18.2\,s ($-36\%$)\\
+D2 & 100 & 0.50 & 0.97 & 0.97 & 35.4\,s & 28.3\,s ($-20\%$)\\
+D3 & 100 & 0.68 & 0.98 & 0.97 & 35.3\,s & 24.1\,s ($-32\%$)\\
+\bottomrule
+\end{tabular}
+\caption{Held-out validation of the ALS course offsets. MAE is on the
+5k-equivalent time. Permutation $p<0.0005$ in every division.}
+\label{tab:alsval}
+\end{table}
+
+Two caveats found while running it. The fit was made on the corpus as it
+stands, which still holds 2,705 duplicate XC rows across 46 meets from the
+July legacy sync (607 with a conflicting distance label) --- small, and a
+targeted delete, but one affected meet's offset is wrong until it is done.
+And 259k XC rows belong to schools whose TFRRS slug did not resolve to a
+division; the samples are drawn from the 405k that did.
+
 \assess{Once weather is attached per race, re-fit the ALS \emph{net of the
 weather term}: the course offset then stops absorbing that day's heat and
 becomes a terrain-only score --- the cleanest hill metric derivable without a
@@ -182,7 +226,7 @@ GPS trace.}
 
 There is no crosswalk: zero athletes carry both an Athletic.net id and a TFRRS id, and MileSplit's \code{tfrrsId} field is null on every bio examined. Linkage is therefore \emph{probabilistic}, and the honest deliverable is the ceiling.
 
-\begin{figure}[h]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[
   font=\footnotesize,
@@ -213,7 +257,7 @@ There is no crosswalk: zero athletes carry both an Athletic.net id and a TFRRS i
    \scriptsize D1$<$D2$<$D3 recovered};
 
 \draw[arr] (hs.east) -- (f1.west);
-\draw[arr] (col.east) -| (f4.south);
+\draw[arr] (col.east) -- (f4.west);
 \draw[arr] (f1.east) -- (link.west);
 \draw[arr] (f2.east) -- (link.west);
 \draw[arr] (f3.east) -- (link.west);
@@ -223,12 +267,55 @@ There is no crosswalk: zero athletes carry both an Athletic.net id and a TFRRS i
 \caption{Probabilistic HS$\to$college linkage. No exact key exists; a scored combination of name, year and event profile reaches $\sim$71\% precision, and TFRRS athlete pages carry a literal High School field (1.5\% of pages) that opens a path to a \emph{real} crosswalk by crawling those pages directly.}
 \end{figure}
 
+\medskip
+\noindent\textbf{Why link at all.} The link is what turns two separate
+result histories into a \emph{trajectory}. With it the platform can say how
+athletes with a given high-school profile developed in college --- expected
+first-year 8K from a 3-mile PR, typical improvement by event and by
+division, who bloomed late --- and place any current athlete against that
+population: Billy Allen's 16:47 3-mile became a 29:39 8K as a freshman, and
+the linked population says whether that is ahead of, on, or behind the
+curve. That \textbf{potential-growth} view is the core of recruiting (v2):
+a prospect's verified HS marks projected forward, rather than a self-reported
+PR read at face value. It also benchmarks a program (what HS profile did our
+athletes who succeeded arrive with) and lets course-adjusted HS and college
+marks be compared on one scale.
+
 \noindent\textbf{The route to a real crosswalk.} TFRRS athlete pages carry a
 literal \emph{``High School:''} field on 1.5\% of archived pages (roster pages do
 not). Crawling athlete pages directly --- rather than inferring identity from
 names --- upgrades the linkage from probabilistic to keyed for the athletes who
 have it, and is the recommended next step for the recruiting and progression
 models.
+
+\subsection{(4) Finding meets to enter}
+
+A coach's recurring question --- what is coming up, and when do entries
+close --- has a scalable answer for high school and an open one for college.
+
+\begin{itemize}
+  \item \textbf{High school: MileSplit's meet feed.} The meets endpoint,
+    \code{/api/v1/meets} with a \code{state} parameter,
+    returns a rolling window of roughly 60 days per state with \code{dateStart},
+    \code{dateEnd}, \code{season}, venue city/state and a
+    \code{registrationActive} flag (probed 2026-08-22: 100 Indiana meets,
+    65 with registration open). It has no deadline field and ignores
+    \code{page}, so the pattern is: poll each state once a day (51 requests),
+    diff against what was seen, and fetch the meet's own page once for any
+    \emph{new} meet with registration open to read the entry deadline. Filter
+    by distance from the team's geocode, by level, and by season, and the
+    result is an ``upcoming meets near you, entries due by'' list that costs
+    a few hundred requests a day nationally.
+  \item \textbf{College: the team's own schedule page.} TFRRS lists only past
+    meets, and DirectAthletics --- where college entries actually happen ---
+    answered our client with a CloudFront 403. But college athletics sites run
+    on a handful of templates (Sidearm, PrestoSports), and Rose-Hulman's
+    served us without challenge: the schedule page carries every scheduled
+    meet with date, host and an \code{.ics} export. Reading a team's schedule
+    from its athletics site is uniform across the template and is the
+    college route; entry deadlines still come from the coach's DirectAthletics
+    account or the host's meet page.
+\end{itemize}
 
 \subsection{Build order}
 Steps that cost nothing against any host come first:
@@ -246,3 +333,35 @@ Steps that cost nothing against any host come first:
   \item Course difficulty: ship the ALS offset, join external ratings as a
     check, then re-fit net of weather for a terrain-only score.
 \end{enumerate}
+
+\subsection{v2 --- Recruiting: considerations and goals}
+
+Recruiting is deliberately a v2 product: it needs the linkage and the
+trajectory models above to be real before it is more than a contact list.
+Goals, in order:
+
+\begin{enumerate}
+  \item \textbf{Prospect lookup with verified marks.} A name resolves to the
+    athlete's MileSplit / Athletic.net record, and the page shows their marks
+    as the platform holds them --- course-adjusted, wind-conditioned where it
+    applies --- not as reported.
+  \item \textbf{Potential growth.} The HS $\to$ college trajectory placed
+    against the linked population: expected first-year marks, the range, and
+    the comparable athletes it is drawn from, by division.
+  \item \textbf{Fit to program.} Where the prospect would sit on this roster
+    (varsity / JV line, pod) and against the conference, using the same
+    projections as the Team tab.
+  \item \textbf{Watch lists and timelines.} Prospects by class year with
+    contact-period dates, the recruiting file that today lives in the athlete
+    person file, and notes.
+  \item \textbf{Recruit-visit mode} stays in v1 under Settings: masking
+    athlete names on a campus visit is a display toggle, not a recruiting
+    feature.
+\end{enumerate}
+
+Considerations: NCAA contact rules vary by division and must be encoded, not
+assumed; high-school data comes from sources with redistribution terms
+(MileSplit's non-commercial etiquette, Athletic.net's ToS), so a commercial
+recruiting product needs a licensing conversation before it ships; and the
+linkage is probabilistic ($\sim$71\% pure today), so every projection must
+carry its confidence and its comparables, never a bare number.
