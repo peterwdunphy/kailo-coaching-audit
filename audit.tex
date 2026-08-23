@@ -25,6 +25,7 @@
 \definecolor{kailogood}{HTML}{2F6D4F}
 \definecolor{boxbg}{HTML}{F4F7F8}
 \definecolor{promptgray}{HTML}{8A9198}
+\definecolor{kailobad}{HTML}{8C3B3B}
 
 \hypersetup{colorlinks=true,linkcolor=kailoaccent,urlcolor=kailoaccent}
 
@@ -66,6 +67,14 @@
 % a to-fill placeholder, visibly provisional
 \newcommand{\prompt}[1]{\par\vspace{2pt}%
   \noindent{\small\itshape\color{promptgray}[\,#1\,]\par}}
+
+% functional-status line from hands-on testing (2026-08-23)
+\newcommand{\fstat}[3]{\par\vspace{2pt}\noindent
+  {\small\textcolor{#1}{\textbf{#2.}}\;\textit{#3}}\par\vspace{1pt}}
+\newcommand{\fworks}[1]{\fstat{kailogood}{Works}{#1}}
+\newcommand{\fpartial}[1]{\fstat{kailowarn}{Partial}{#1}}
+\newcommand{\fbroken}[1]{\fstat{kailobad}{Not working}{#1}}
+\newcommand{\funverified}[1]{\fstat{promptgray}{Unverified}{#1}}
 
 % a question to put to the coaching group (proposals, not decisions)
 \newcommand{\question}[1]{\par\vspace{4pt}%
@@ -203,6 +212,97 @@ Adjust & Week wall & The Roster\\
 
 % ------ the per-tier-0, per-page audit ------
 \input{vertical}
+
+% ------ functional status from hands-on testing ------
+\subsection{What works and what does not}
+
+Hands-on functional testing, 2026-08-23. Status key:
+\textcolor{kailogood}{\textbf{works}} $\cdot$
+\textcolor{kailowarn}{\textbf{partial}} $\cdot$
+\textcolor{kailobad}{\textbf{not working}} $\cdot$
+\textcolor{promptgray}{\textbf{unverified}}. The same notes appear inline
+on each page above.
+
+\begin{table}[tbp]
+\centering\small
+\begin{tabular}{@{}p{0.15\linewidth}p{0.15\linewidth}p{0.62\linewidth}@{}}
+\toprule
+\textbf{Page} & \textbf{Status} & \textbf{Finding}\\
+\midrule
+\multicolumn{3}{@{}l}{\itshape Before Practice}\\
+Today & \textcolor{kailogood}{\textbf{works}} & only the conditions widget
+  is not populating; conditions were entered at 3\,pm and the page says they
+  update overnight --- recheck in the morning\\
+Tasks + Links & \textcolor{kailogood}{\textbf{works}} & ---\\
+Planner & \textcolor{kailowarn}{\textbf{partial}} & all 14 weeks arrive
+  automatically assigned as base; a week cannot be designated otherwise up
+  front, only edited after the fact\\
+Workout planner & \textcolor{kailowarn}{\textbf{partial}} & text input
+  misparses (as noted); the dew-point adjuster works\\
+Pace cards & \textcolor{kailogood}{\textbf{works}} & the manual page /
+  phone toggle earns little: there is no mobile version, so a phone gets the
+  desktop site\\[2pt]
+\multicolumn{3}{@{}l}{\itshape Share with the Team}\\
+Athlete day & \textcolor{promptgray}{\textbf{unverified}} & not yet
+  functionally tested\\
+Team board & \textcolor{kailowarn}{\textbf{partial}} & works well, but
+  inputs stay unformatted strings (``8K'' never resolves to 8000\,m /
+  event / pace), and a workout entered in ``This week'' does not update the
+  Planner\\
+1-on-1s & \textcolor{kailowarn}{\textbf{partial}} & question prompts are
+  not editable; notes do not collapse, so a season of long notes is hard to
+  move through\\[2pt]
+\multicolumn{3}{@{}l}{\itshape After Practice}\\
+Session review & \textcolor{promptgray}{\textbf{unverified}} & appears
+  non-functional, but nothing is populated, so it cannot be verified either
+  way\\
+Inbox & \textcolor{kailogood}{\textbf{works}} & wish: link email /
+  communications with athletes\\[2pt]
+\multicolumn{3}{@{}l}{\itshape The Roster}\\
+Week wall & \textcolor{kailobad}{\textbf{not working}} & no tandem with the
+  Planner: tempo reps entered for Thursday render here as an easy run\\
+Volume & \textcolor{kailowarn}{\textbf{partial}} & works; directive and
+  loop never populate (Actuals / Adherence empty by design)\\
+Athlete & \textcolor{kailogood}{\textbf{works}} & every object on the page
+  functions\\
+Parameters & \textcolor{kailowarn}{\textbf{partial}} & no visible way to
+  hand-update critical speed; speed reserve and D-prime are not populating\\
+Results & \textcolor{kailogood}{\textbf{works}} & ---\\
+Predictions & \textcolor{promptgray}{\textbf{unverified}} & currently
+  empty; cannot assess\\[2pt]
+\multicolumn{3}{@{}l}{\itshape Housekeeping}\\
+Operations & \textcolor{kailogood}{\textbf{works}} & ``paste receipts''
+  should be \emph{upload} receipts if the page is to serve auditing\\
+Data health & \textcolor{kailowarn}{\textbf{partial}} & works; whether the
+  Strava linkage holds long-term is unconfirmed, and athlete naming is
+  inconsistent --- some show as ids (\code{user-a5a41ffd}), some as a first
+  name, some as first and last\\
+How this works & \textcolor{kailobad}{\textbf{not working}} & completely
+  empty\\
+Setup & \textcolor{kailogood}{\textbf{works}} & wish: an OSM-backed venue
+  lookup --- typing ``Kezar Track'' suggests ``Kezar Track, San Francisco''
+  and clicking autopopulates the lat/long\\
+\bottomrule
+\end{tabular}
+\caption{Functional status by page, hands-on testing 2026-08-23.}
+\label{tab:fstatus}
+\end{table}
+
+\noindent\textbf{Cross-cutting findings} the table repeats in miniature:
+\begin{itemize}
+  \item \textbf{Free text stays free text.} Across the product, what a coach
+    types is stored as a character string --- ``8K'' never becomes an event
+    with a distance and a pace. This is the same gap as the
+    text-to-structured-workout and templating work in the Next Steps.
+  \item \textbf{Modules do not sync.} Team board's ``This week'' and the
+    Planner each hold their own copy of the week; the Planner and Week wall
+    disagree about Thursday. One plan object, many views (\S\ref{sec:expanded})
+    is the structural fix.
+  \item \textbf{Athlete identity display is inconsistent everywhere} --- ids,
+    first names, and full names for different users on the same widgets.
+  \item \textbf{There is no mobile version}; phones receive the desktop
+    site.
+\end{itemize}
 
 % ------ the proposal + wording (retained) ------
 \subsection{Proposed structure: five main tabs}
