@@ -66,6 +66,11 @@
 % a to-fill placeholder, visibly provisional
 \newcommand{\prompt}[1]{\par\vspace{2pt}%
   \noindent{\small\itshape\color{promptgray}[\,#1\,]\par}}
+
+% a question to put to the coaching group (proposals, not decisions)
+\newcommand{\question}[1]{\par\vspace{4pt}%
+  \noindent\colorbox{kailosoft}{\parbox{\dimexpr\linewidth-2\fboxsep}{%
+  \small\textcolor{kailoaccent}{\textbf{Q.}}\;#1}}\par\vspace{3pt}}
   
 % ================================================================== title ===
 \begin{document}
@@ -116,7 +121,9 @@
   \item \textbf{Text-to-structured-workout parsing.} The planner grid must turn
     ``2 mile wu, 5 tempo, 3 cd'' into a structured workout that can be analyzed
     post hoc; the current parser misreads such inputs (see the Planner and
-    Workout planner audits).
+    Workout planner audits). It also needs a \textbf{templating layer} ---
+    ``2 mi @ \code{<threshold>}'' --- where the placeholder resolves per
+    athlete from the model we host; today only absolute values parse.
   \item \textbf{Weather upgrade.} Move the adjustment metric from dew point to
     wet-bulb globe temperature, and show conditions for four windows --- this
     morning / afternoon, next morning / afternoon --- to cover doubles.
@@ -202,7 +209,9 @@ Adjust & Week wall & The Roster\\
 \label{sec:proposal}
 
 Collapse the sprawl into five tabs. This is a first pass, assembled from the
-per-page recommendations above.
+per-page recommendations above --- and because it goes to a group of coaches,
+the forward-looking pieces are put as questions (the ``Q.'' boxes) rather
+than decisions.
 
 \begin{enumerate}
   \item \textbf{Today} --- the landing page. Keeps what the current Today page
@@ -213,9 +222,9 @@ per-page recommendations above.
     (fixing the doubles gap). Every widget collapsible, and the widget set
     coach-customizable.
   \item \textbf{Upcoming} --- planning, anchored by the Planner (day / week /
-    training block) with the Workout planner as its zoomed-in day view.
-    Absorbs race plans (from Team board) and the Plan \& Goals material
-    currently inside Volume.
+    training block) with the Workout planner as its zoomed-in day view, and
+    more than one view of the same day (grid by group, sheet by athlete).
+    Race plans (from Team board) are a v2 layer.
   \item \textbf{Team} --- a team landing page (name, picture,
     conference/division information, the team document), with routes into:
     \begin{itemize}
@@ -226,6 +235,8 @@ per-page recommendations above.
         links to that athlete's page;
       \item \textbf{PRs / season progression} --- selecting an athlete goes
         to their page;
+      \item \textbf{Volume} --- the volume tracking now in The Roster tier,
+        plan \& goals included;
       \item \textbf{Operations} --- logistics: money, equipment, the .ics
         calendar export.
     \end{itemize}
@@ -246,6 +257,9 @@ per-page recommendations above.
 Table~\ref{tab:proposal} maps the proposal onto the current hub; the expanded
 plans below give the per-tab build detail.
 
+\question{Does the five-tab split match how you actually move through a day
+--- and is anything here missing a home?}
+
 \begin{table}[h]
 \centering\small
 \begin{tabular}{@{}p{0.12\linewidth}p{0.42\linewidth}p{0.36\linewidth}@{}}
@@ -256,13 +270,13 @@ Today & glance row; conditions (four windows); today's plan + print; needs a
   look; most recent session; tasks &
   Today, Tasks + Links, Session review (as a module), Inbox (flags)\\[3pt]
 Upcoming & the planner at four zooms: block $\to$ week $\to$ day $\to$
-  athlete preview; race plans; plan \& goals &
-  Planner, Workout planner, Athlete day, Team board (race plans), Volume
-  (goals), Week wall (as a view)\\[3pt]
-Team & landing page; Roster; Results; PRs / progression; Operations; the
-  athlete pages &
-  The Roster tier, Team board (team document, PR board), Operations, 1-on-1s
-  (linked from athlete pages)\\[3pt]
+  athlete preview; day views (grid / sheet); race plans (v2) &
+  Planner, Workout planner, Athlete day, Week wall (as a view), Team board
+  (race plans, v2)\\[3pt]
+Team & landing page; Roster; Results; PRs / progression; Volume;
+  Operations; the athlete pages &
+  The Roster tier (incl.\ Volume), Team board (team document, PR board),
+  Operations, 1-on-1s (linked from athlete pages)\\[3pt]
 Recruiting & v2 placeholder &
   Recruiting file (from the person file)\\[3pt]
 Settings & data import; team / coach / program; workout rules; parameters;
@@ -289,11 +303,10 @@ need not look alike.
 
 \begin{itemize}
   \item \textbf{Greeting line} --- ``Good morning, Coach. Today is Tuesday,
-    September 8 $\cdot$ XC day 34.'' Time-of-day aware. The salutation, the
-    name, and what follows the date (season day count, days to the next race,
-    nothing) are all fields the coach sets. The day count is \emph{sport}-
-    specific --- ``XC day 34,'' ``Indoor day 12,'' ``Outdoor day 40'' --- never
-    a generic day number, since a program runs three seasons a year.
+    September 8 $\cdot$ HCAC Preview in 26 days.'' Time-of-day aware, with a
+    deliberately simple default: the date plus days until the next meet.
+    Deeper customization of this line (salutation, season day counts, or
+    nothing at all) is a later conversation.
   \item \textbf{Glance row} --- four small slots. The default four are
     uploaded yesterday, athletes available today, data flags / gone quiet,
     and needs a look; any slot can be swapped for another glance widget ---
@@ -301,11 +314,11 @@ need not look alike.
     plan (Table~\ref{tab:glance}).
   \item \textbf{Conditions strip} --- four windows (this morning, this
     afternoon, tomorrow morning, tomorrow afternoon) so doubles are covered.
-    The \emph{model} behind workout adjustments is wet-bulb globe
-    temperature, but WBGT is a poor thing to show a coach. Each window
-    displays temperature, a conditions icon (sun / cloud / rain),
-    precipitation chance, and humidity; the WBGT-derived flag surfaces only
-    as the window's colour.
+    The adjustment model runs on wet-bulb globe temperature. The default
+    display shows temperature, a conditions icon (sun / cloud / rain),
+    precipitation chance, humidity, \emph{and} the WBGT with the model's
+    slowdown beside it --- some coaches will want the number, some only the
+    window's colour, so which weather fields appear is a coach preference.
   \item \textbf{Today's plan} --- the print option kept one click away.
   \item \textbf{Most recent session} --- the Session review material as a
     module, with historical sessions reachable from it.
@@ -325,20 +338,20 @@ need not look alike.
   \draw[draw=kailoink,rounded corners=2pt] (0,0) rectangle (120,76);
   \node[anchor=west,font=\scriptsize,text width=112mm,align=left,inner sep=0pt] at (3,71.5)
     {\textbf{Good morning, Coach.} Today is Tuesday, September 8
-     {\tiny\color{promptgray}\ $\cdot$ XC day 34 $\cdot$ HCAC in 26 days}};
+     {\tiny\color{promptgray}\ $\cdot$ HCAC Preview in 26 days}};
   \node[wid,minimum width=27mm,minimum height=9mm] (g1) at (16,62)  {\textbf{14 / 77}\\uploaded yesterday};
   \node[wid,minimum width=27mm,minimum height=9mm] (g2) at (45,62)  {\textbf{71}\\available today};
   \node[wid,minimum width=27mm,minimum height=9mm] (g3) at (74,62)  {\textbf{3}\\gone quiet};
   \node[wid,minimum width=27mm,minimum height=9mm] (g4) at (103,62) {\textbf{5}\\needs a look};
   \foreach \n in {g1,g2,g3,g4} \node[sz] at (\n.north east) {S};
   \node[cond,minimum width=27mm,minimum height=13mm] (c1) at (16,47.5)
-    {this morning\\\textbf{58$^{\circ}$F} $\cdot$ sun\\rain 10\% $\cdot$ hum.\ 72\%};
+    {this morning\\\textbf{58$^{\circ}$F} $\cdot$ sun {\tiny$\cdot$ rain 10\%}\\{\tiny WBGT 54 $\cdot$ adj $+0.0$\%}};
   \node[cond,minimum width=27mm,minimum height=13mm,fill=kailowarn!15,draw=kailowarn] (c2) at (45,47.5)
-    {this afternoon\\\textbf{84$^{\circ}$F} $\cdot$ sun\\rain 5\% $\cdot$ hum.\ 48\%};
+    {this afternoon\\\textbf{84$^{\circ}$F} $\cdot$ sun {\tiny$\cdot$ rain 5\%}\\{\tiny WBGT 78 $\cdot$ adj $+2.4$\%}};
   \node[cond,minimum width=27mm,minimum height=13mm] (c3) at (74,47.5)
-    {tomorrow morning\\\textbf{61$^{\circ}$F} $\cdot$ cloud\\rain 40\% $\cdot$ hum.\ 80\%};
+    {tomorrow morning\\\textbf{61$^{\circ}$F} $\cdot$ cloud {\tiny$\cdot$ rain 40\%}\\{\tiny WBGT 60 $\cdot$ adj $+0.3$\%}};
   \node[cond,minimum width=27mm,minimum height=13mm] (c4) at (103,47.5)
-    {tomorrow afternoon\\\textbf{72$^{\circ}$F} $\cdot$ rain\\rain 70\% $\cdot$ hum.\ 85\%};
+    {tomorrow afternoon\\\textbf{72$^{\circ}$F} $\cdot$ rain {\tiny$\cdot$ rain 70\%}\\{\tiny WBGT 70 $\cdot$ adj $+1.5$\%}};
   \foreach \n in {c1,c2,c3,c4} \node[sz] at (\n.north east) {S};
   \node[wid,minimum width=56mm,minimum height=30mm] (plan) at (31,24)
     {\textbf{today's plan}\\{\color{promptgray}[print]}};
@@ -352,12 +365,17 @@ need not look alike.
   \node[hint,minimum width=114mm,minimum height=5.5mm] at (60,4.5)
     {\itshape default layout --- every slot swappable, every widget collapsible, S / M / L sizes};
 \end{tikzpicture}
-\caption{Today, default layout. The glance row is four swappable slots; the
-conditions strip shows what a coach reads (temperature, icon, rain,
-humidity) while WBGT drives only the window's colour --- the afternoon here
-is flagged. Corner letters are widget sizes.}
+\caption{Today, default layout. The glance row is four swappable slots; each
+conditions window shows the readable fields (temperature, icon, rain) with
+the WBGT and the model's slowdown beside them, and the WBGT band colours the
+window --- the afternoon here is flagged. Which fields appear is a coach
+preference. Corner letters are widget sizes.}
 \label{fig:todaywire}
 \end{figure}
+
+\question{Which four glance slots would you put in your row --- and what is
+missing from the catalog below? For conditions: WBGT shown beside the
+slowdown, or only driving the window's colour?}
 
 \paragraph{Widgets come in three sizes.} Following the Apple widget model: a
 \textbf{glance} (S) widget is one number or flag in a 1$\times$1 tile; a
@@ -379,7 +397,7 @@ Available today & athletes cleared to practice & count\\
 Data flags / gone quiet & athletes with no upload in $k$ days & count, links\\
 Needs a look & activities flagged abnormal (HR high on easy, distance off plan) & count, links\\
 Days until next race & countdown plus the meet name & number\\
-Season day & ``XC day 34 of 112'' --- counted within the current sport season (XC / indoor / outdoor), or weeks to the championship & number\\
+Season day & day count within the current season, or weeks to the championship & number\\
 Injured / training room & athletes on a modified plan & count, links\\
 Paperwork outstanding & missing clearances & count, links\\
 Team mileage vs.\ plan & this week's volume as a percent of planned & percent\\
@@ -441,7 +459,7 @@ last.
 
 One planning object at four zoom levels, rather than three separate pages
 (Figure~\ref{fig:zoom}): the season block (phases, goals, peak mileage,
-down-week depth --- absorbing Volume's Plan \& Goals), the week grid (Week
+down-week depth), the week grid (Week
 wall becomes a view option here, not a page), the single day (the Workout
 planner's pods, paces, and weather/terrain adjustments), and the athlete
 preview (Athlete day as a ``preview'' button, not a destination).
@@ -450,9 +468,15 @@ preview (Athlete day as a ``preview'' button, not a destination).
   \item \textbf{Text-to-structured-workout parsing} is the load-bearing
     technical piece: ``2 mile wu, 5 tempo, 3 cd'' typed in the grid must
     become a structured workout that can be analyzed post hoc.
-  \item \textbf{Race plans} move here from Team board and attach to meet
-    dates: per-athlete goals plus predicted pace ranges, and eventually MCMC
-    field simulations against expected competition.
+  \item \textbf{Workout templating has to be built.} The current system
+    takes absolute values only. A workout must also be writable as a
+    template --- ``2 mi @ \code{<threshold>}'' --- where the placeholder
+    resolves per athlete from the model we host, so one line prescribes a
+    different pace to every athlete.
+  \item \textbf{Race plans are v2.} When they come they move here from Team
+    board and attach to meet dates: per-athlete goals, predicted pace ranges,
+    eventually MCMC field simulations against expected competition. v1 ships
+    the planner itself.
   \item \textbf{Training paces} (the Pace cards content) surface here as
     links; the paces themselves live on the athlete page.
 \end{itemize}
@@ -461,13 +485,15 @@ preview (Athlete day as a ``preview'' button, not a destination).
 day for editing directly, without leaving the week (Figure~\ref{fig:dayedit}).
 The pop-up holds the text entry, the structure the parser made of it, and the
 \textbf{variants by attribute}: the same session prescribed differently to
-different groups. ``5 tempo'' for varsity boys, ``4 tempo'' for varsity girls
-and JV boys, ``3 tempo'' for JV girls is one workout with four variants, not
-four workouts, and the coach writes it once. Variants key on roster
-attributes (gender, varsity / JV, pod --- see the Team section), and pods for
-the day are proposed from the pod settings: the coach can force the number
-of pods, the number of athletes per pod, and whether pods are mixed- or
-single-gender; the product fills them from training paces.
+different groups. ``5 tempo'' for the boys and ``4 tempo'' for the girls is
+one workout with two variants, not two workouts, and the coach writes it
+once. v1 keys variants on the attributes the roster reliably has --- gender
+and pod; a varsity / JV split, or any other tag a program wants, is a
+\emph{custom attribute}, v2 unless the roster data already carries it, so
+the first release stays focused on one team. Pods for the day are proposed
+from the pod settings: the coach can force the number of pods, the number of
+athletes per pod, and whether pods are mixed- or single-gender; the product
+fills them from training paces.
 
 \begin{figure}[H]
 \centering
@@ -485,10 +511,9 @@ single-gender; the product fills them from training paces.
   \node[anchor=north west,inner sep=0pt] at (3,36.5) {\setlength{\tabcolsep}{2.5pt}
     \begin{tabular}{@{}>{\tiny}p{22mm}>{\tiny}p{34mm}>{\tiny}p{18mm}>{\tiny}p{16mm}@{}}
       \textbf{group} & \textbf{prescription} & \textbf{pods} & \textbf{athletes}\\[1pt]
-      varsity boys & 2 wu $\cdot$ \textbf{5} tempo $\cdot$ 3 cd & A, B & 14\\
-      varsity girls & 2 wu $\cdot$ \textbf{4} tempo $\cdot$ 3 cd & C & 7\\
-      JV boys & 2 wu $\cdot$ \textbf{4} tempo $\cdot$ 3 cd & D, E & 12\\
-      JV girls & 2 wu $\cdot$ \textbf{3} tempo $\cdot$ 3 cd & F & 6\\
+      boys & 2 wu $\cdot$ \textbf{5} tempo $\cdot$ 3 cd & A, B, C & 21\\
+      girls & 2 wu $\cdot$ \textbf{4} tempo $\cdot$ 3 cd & D, E & 13\\
+      {\color{promptgray}+ custom split (e.g.\ JV)} & {\color{promptgray}--- v2} & &\\
     \end{tabular}};
   \node[anchor=west] at (3,17.5) {\textbf{Pods} {\color{promptgray}$\cdot$ proposed from training paces}};
   \node[btn,anchor=west] at (3,12) {pods: auto $\vee$};
@@ -500,14 +525,28 @@ single-gender; the product fills them from training paces.
   \node[anchor=east,color=promptgray] at (103,5) {one workout, four variants};
 \end{tikzpicture}
 \caption{Editing a day in place. One text entry, one parse, and a variant per
-attribute group; pods are proposed from training paces under the coach's pod
-settings (count, size, gender mixing).}
+attribute group (custom splits such as varsity / JV are v2); pods are
+proposed from training paces under the coach's pod settings (count, size,
+gender mixing).}
 \label{fig:dayedit}
 \end{figure}
 
-Build order: the four-zoom shell around the existing planner first; the text
-parser next; in-place day editing with attribute variants; the race-plan
-predictive layer last.
+\paragraph{Views of the same day.} The grid-by-group view above is one way
+to look at a day. A coach asked for another: a spreadsheet-style sheet of
+every athlete running that day --- one row per athlete with their group and
+pace --- where dragging a row moves the athlete between pods. The automation
+put Peter in pod B; the coach thinks he should run the faster pace in pod A,
+and fixes it in one motion. Day and week should support multiple views of
+the same underlying plan --- grid by group, sheet by athlete, the printable
+list, the athlete-day preview --- the way Week wall becomes a view of the
+week rather than a page of its own.
+\question{Which views of a day would you actually use --- the grid by group,
+a drag-to-reassign athlete sheet, a printable list? And what is your first
+move when the proposed pods are wrong?}
+
+Build order: the four-zoom shell around the existing planner first; the
+text parser and the templating layer next; in-place day editing with
+attribute variants and the athlete-sheet view; race plans in v2.
 
 \begin{figure}[H]
 \centering
@@ -546,7 +585,13 @@ shown beneath it, the race day highlighted, and the block-level context
   racec/.style={dayc,draw=kailowarn,fill=kailowarn!12},
   rail/.style={draw=kailorule,fill=boxbg,rounded corners=1pt,align=left,
     inner sep=2pt,anchor=west}]
-  \draw[draw=kailoink,rounded corners=2pt] (0,0) rectangle (120,64);
+  \draw[draw=kailorule,fill=boxbg,rounded corners=2pt] (-6,3) rectangle (-1.5,61);
+  \draw[draw=kailorule,fill=boxbg,rounded corners=2pt] (121.5,3) rectangle (126,61);
+  \node[color=promptgray,font=\tiny,rotate=90] at (-3.75,32) {week of Aug 31 -- Sep 6};
+  \node[color=promptgray,font=\tiny,rotate=90] at (123.75,32) {week of Sep 14 -- 20};
+  \draw[draw=kailoink,rounded corners=2pt,fill=white] (0,0) rectangle (120,64);
+  \node[color=promptgray,font=\scriptsize] at (60,-3.5)
+    {$\langle$\ \ {\color{kailorule}$\bullet$}\ {\color{kailorule}$\bullet$}\ {\color{kailoaccent}$\bullet$}\ {\color{kailorule}$\bullet$}\ {\color{kailorule}$\bullet$}\ \ $\rangle$};
   \node[tab]   at (9,59.5)  {Block};
   \node[tabon] at (20,59.5) {\textbf{Week}};
   \node[tab]   at (30,59.5) {Day};
@@ -558,42 +603,50 @@ shown beneath it, the race day highlighted, and the block-level context
   \node[dayc] at (42.5,54)  {\textbf{Wed 9}\\[2pt]Easy 60 min + strides\\[2pt]{\color{kailoaccent}easy $\cdot$ 60$'$ $\cdot$ 6 st}};
   \node[dayc] at (58.5,54)  {\textbf{Thu 10}\\[2pt]6$\times$1000 @ 5k, 2$'$ jog\\[2pt]{\color{kailoaccent}6$\times$1000 @ 5k $\cdot$ r 2$'$}};
   \node[dayc] at (74.5,54)  {\textbf{Fri 11}\\[2pt]Easy 30 min\\[2pt]{\color{kailoaccent}easy $\cdot$ 30$'$}};
-  \node[racec] at (90.5,54) {\textbf{Sat 12}\\[2pt]\textbf{RACE}\\HCAC Preview 8K\\[2pt]{\color{kailowarn}race plan $\cdot$ 12 set}};
+  \node[racec] at (90.5,54) {\textbf{Sat 12}\\[2pt]\textbf{RACE}\\HCAC Preview 8K\\[2pt]{\color{kailowarn}14 entered}};
   \node[dayc] at (106.5,54) {\textbf{Sun 13}\\[2pt]Long run 90 min\\[2pt]{\color{kailoaccent}long $\cdot$ 90$'$}};
   \node[rail,text width=54mm] at (3,16.5)
     {\textbf{Plan \& goals} --- target 62 mi this week $\cdot$ peak 70 mi
      $\cdot$ down-week next {\color{promptgray}(from Volume)}};
   \node[rail,text width=53mm] at (61,16.5)
-    {\textbf{Race plan: HCAC Preview} --- goals set for 12 of 14 entrants $\cdot$
-     predicted pace ranges ready {\color{promptgray}(from Team board)}};
+    {\textbf{Race day: HCAC Preview 8K} --- 14 entered $\cdot$
+     {\color{promptgray}race plans arrive in v2}};
   \node[anchor=west,color=promptgray,font=\tiny,text width=112mm,align=left,inner sep=0pt] at (3,5)
     {\itshape text typed in a day becomes the structured line beneath it; click a day for the Day zoom, Preview for the athlete's view};
 \end{tikzpicture}
-\caption{Upcoming, week zoom. Each day's free-text entry is parsed into the
-structured workout shown under it (the load-bearing technical piece); the
-race day carries its race-plan status; the rail holds the block context.}
+\caption{Upcoming, week zoom, shown as a carousel: adjacent weeks peek at
+the edges and a swipe or arrow moves between them, while the zoom tabs
+switch level. Each day's free-text entry is parsed into the structured
+workout shown under it (the load-bearing technical piece); the rail holds
+the block context. Race plans are v2.}
 \label{fig:upcomingwire}
 \end{figure}
 
 \subsubsection{Team}
 
 A team landing page --- name, picture, conference/division information, the
-team document (rules / creeds / values), and the PR board --- with four
+team document (rules / creeds / values), and the PR board --- with five
 routes (Figure~\ref{fig:teamflow}): the Roster, the Results repository
-(import as a pop-up, not a tab), the PR / season-progression boards, and
-Operations (money, equipment, the .ics export of the meet and training
+(import as a pop-up, not a tab), the PR / season-progression boards,
+Volume (the volume tracking from The Roster tier, plan \& goals included),
+and Operations (money, equipment, the .ics export of the meet and training
 calendar). Every surface that shows an athlete's name --- roster row, result
 line, PR board entry --- opens the same athlete page.
+\question{Should the athlete page stay reachable only through Team (roster,
+results, boards), or does it deserve a top-level tab of its own? And does
+Volume sit better here or under Upcoming?}
 
 \paragraph{Roster attributes.} The roster carries, per athlete, the
-attributes the rest of the product keys on: \textbf{gender},
-\textbf{varsity / JV}, and \textbf{pod} (the training-pace group). Pods are
-either set by hand or proposed: the coach chooses the number of pods, or the
-number of athletes per pod, and whether pods are mixed- or single-gender, and
-the product estimates current pods from training paces and recent race marks.
-Workout variants in Upcoming address these attributes directly (``varsity
-girls and JV boys: 4 tempo''), which is why they live on the roster rather
-than in a settings page.
+attributes the rest of the product keys on. In v1 those are \textbf{gender}
+and \textbf{pod} (the training-pace group); a \textbf{varsity / JV} split
+--- or any other tag a program wants --- is a \emph{custom attribute}, v2
+unless the roster data already carries it, so the first release stays
+focused on one team. Pods are either set by hand or proposed: the coach
+chooses the number of pods, or the number of athletes per pod, and whether
+pods are mixed- or single-gender, and the product estimates current pods
+from training paces and recent race marks. Workout variants in Upcoming
+address these attributes directly (``girls: 4 tempo''), which is why they
+live on the roster rather than in a settings page.
 
 \begin{figure}[h]
 \centering
@@ -606,14 +659,16 @@ than in a settings page.
     align=center,inner sep=5pt},
   arr/.style={-{Stealth[length=1.6mm]},kailoink}]
   \node[tabnode] (team) at (0,0) {\textbf{Team}\\{\scriptsize landing page}};
-  \node[leaf] (roster)  at (3.6, 1.8)  {Roster};
-  \node[leaf] (prs)     at (3.6, 0.6)  {PRs / progression};
-  \node[leaf] (results) at (3.6,-0.6)  {Results};
-  \node[leaf] (ops)     at (3.6,-1.8)  {Operations};
-  \node[athnode] (ath)  at (8.2, 0.6)  {\textbf{Athlete page}};
+  \node[leaf] (roster)  at (3.6, 2.2)  {Roster};
+  \node[leaf] (prs)     at (3.6, 1.1)  {PRs / progression};
+  \node[leaf] (results) at (3.6, 0)    {Results};
+  \node[leaf] (vol)     at (3.6,-1.1)  {Volume};
+  \node[leaf] (ops)     at (3.6,-2.2)  {Operations};
+  \node[athnode] (ath)  at (8.2, 1.1)  {\textbf{Athlete page}};
   \draw[arr] (team) -- (roster);
   \draw[arr] (team) -- (prs);
   \draw[arr] (team) -- (results);
+  \draw[arr] (team) -- (vol);
   \draw[arr] (team) -- (ops);
   \draw[arr] (roster)  -- (ath)
     node[midway,above,sloped,font=\scriptsize]{select athlete};
@@ -623,14 +678,14 @@ than in a settings page.
 \end{tikzpicture}
 \caption{The Team tab. The athlete page is secondary: reached from the
 roster, the PR / progression boards, or any result line --- all three
-converge on the same object. Operations stays team-level.}
+converge on the same object. Volume and Operations stay team-level.}
 \label{fig:teamflow}
 \end{figure}
 
 Figure~\ref{fig:teamwire} is the landing page with Rose-Hulman Institute of
 Technology as the example: an identity header (mark, name, location, current
 season, head coach, conference and division), then a stack of blocks ---
-coaches, athletes, results, PRs, schedule, operations --- each of which opens
+coaches, athletes, results, PRs, volume, schedule, operations --- each of which opens
 its route. The block order is the coach's: the handles on the left move a
 block up or down, so a coach who wants the roster first and the staff list
 last gets exactly that.
@@ -642,49 +697,53 @@ last gets exactly that.
   blk/.style={draw=kailorule,fill=white,rounded corners=1pt,anchor=north west,inner sep=0pt},
   handle/.style={font=\tiny,color=promptgray,anchor=west,inner sep=0pt},
   route/.style={font=\tiny,color=kailoaccent,anchor=east,inner sep=0pt}]
-  \draw[draw=kailoink,rounded corners=2pt] (0,0) rectangle (120,96);
+  \draw[draw=kailoink,rounded corners=2pt] (0,0) rectangle (120,104);
   % ---- identity header
-  \node[hdr,minimum width=114mm,minimum height=22mm] (h) at (3,93) {};
-  \node[anchor=north west,inner sep=0pt] at (5,91.5)
+  \node[hdr,minimum width=114mm,minimum height=22mm] (h) at (3,101) {};
+  \node[anchor=north west,inner sep=0pt] at (5,99.5)
     {\includegraphics[width=18mm]{fig/rhit_logo.png}};
-  \node[anchor=north west,inner sep=0pt,align=left] at (26,91)
+  \node[anchor=north west,inner sep=0pt,align=left] at (26,99)
     {{\normalsize\bfseries Rose-Hulman Institute of Technology}\\[2pt]
      Terre Haute, Indiana\\[1pt]
      \textbf{Cross Country $\cdot$ Fall 2026}\\[1pt]
      Head coach: Derick Lawrence\\[1pt]
      HCAC $\cdot$ NCAA Division III};
   % ---- coaches block (expanded)
-  \node[blk,minimum width=114mm,minimum height=24mm] (b1) at (3,69) {};
-  \node[handle] at (4.5,67) {$\uparrow\downarrow$};
-  \node[anchor=west,inner sep=0pt] at (9,67) {\textbf{Coaches}};
-  \node[route] at (115,67) {collapse $\wedge$};
-  \node[anchor=north west,inner sep=0pt] at (9,64.5) {\setlength{\tabcolsep}{2pt}\tiny
+  \node[blk,minimum width=114mm,minimum height=24mm] (b1) at (3,77) {};
+  \node[handle] at (4.5,75) {$\uparrow\downarrow$};
+  \node[anchor=west,inner sep=0pt] at (9,75) {\textbf{Coaches}};
+  \node[route] at (115,75) {collapse $\wedge$};
+  \node[anchor=north west,inner sep=0pt] at (9,72.5) {\setlength{\tabcolsep}{2pt}\tiny
     \begin{tabular}{@{}>{\tiny\raggedright\arraybackslash}p{22mm}>{\tiny\raggedright\arraybackslash}p{33mm}>{\tiny\raggedright\arraybackslash}p{31mm}>{\tiny\raggedright\arraybackslash}p{17mm}@{}}
       \textbf{Name} & \textbf{Title} & \textbf{Email} & \textbf{Phone}\\[1pt]
       Derick Lawrence & Head Men's \& Women's Cross Country / Assistant Track \& Field Coach & lawrenc1@rose-hulman.edu & (812) 877-8246\\[2pt]
       Shane Mills & Head Men's \& Women's Track \& Field / Assistant Cross Country Coach & mills2@rose-hulman.edu & (812) 877-8051\\
     \end{tabular}};
   % ---- collapsed blocks
-  \node[blk,minimum width=114mm,minimum height=7mm] (b2) at (3,43) {};
+  \node[blk,minimum width=114mm,minimum height=7mm] (b2) at (3,51) {};
+  \node[handle] at (4.5,47.5) {$\uparrow\downarrow$};
+  \node[anchor=west,inner sep=0pt] at (9,47.5) {\textbf{Athletes} {\color{promptgray}$\cdot$ 77 on the roster $\cdot$ 56 men, 21 women}};
+  \node[route] at (115,47.5) {Roster $\rightarrow$};
+  \node[blk,minimum width=114mm,minimum height=7mm] (b3) at (3,43) {};
   \node[handle] at (4.5,39.5) {$\uparrow\downarrow$};
-  \node[anchor=west,inner sep=0pt] at (9,39.5) {\textbf{Athletes} {\color{promptgray}$\cdot$ 77 on the roster $\cdot$ 56 men, 21 women}};
-  \node[route] at (115,39.5) {Roster $\rightarrow$};
-  \node[blk,minimum width=114mm,minimum height=7mm] (b3) at (3,35) {};
+  \node[anchor=west,inner sep=0pt] at (9,39.5) {\textbf{Results} {\color{promptgray}$\cdot$ last: NCAA Division III Championships, Nov 22, 2025}};
+  \node[route] at (115,39.5) {Results $\rightarrow$};
+  \node[blk,minimum width=114mm,minimum height=7mm] (b4) at (3,35) {};
   \node[handle] at (4.5,31.5) {$\uparrow\downarrow$};
-  \node[anchor=west,inner sep=0pt] at (9,31.5) {\textbf{Results} {\color{promptgray}$\cdot$ last: NCAA Division III Championships, Nov 22, 2025}};
-  \node[route] at (115,31.5) {Results $\rightarrow$};
-  \node[blk,minimum width=114mm,minimum height=7mm] (b4) at (3,27) {};
+  \node[anchor=west,inner sep=0pt] at (9,31.5) {\textbf{PRs / progression} {\color{promptgray}$\cdot$ record board, season progression}};
+  \node[route] at (115,31.5) {Boards $\rightarrow$};
+  \node[blk,minimum width=114mm,minimum height=7mm] (b5) at (3,27) {};
   \node[handle] at (4.5,23.5) {$\uparrow\downarrow$};
-  \node[anchor=west,inner sep=0pt] at (9,23.5) {\textbf{PRs / progression} {\color{promptgray}$\cdot$ record board, season progression}};
-  \node[route] at (115,23.5) {Boards $\rightarrow$};
-  \node[blk,minimum width=114mm,minimum height=7mm] (b5) at (3,19) {};
+  \node[anchor=west,inner sep=0pt] at (9,23.5) {\textbf{Schedule} {\color{promptgray}$\cdot$ next meet, entries due, .ics}};
+  \node[route] at (115,23.5) {Schedule $\rightarrow$};
+  \node[blk,minimum width=114mm,minimum height=7mm] (b6) at (3,19) {};
   \node[handle] at (4.5,15.5) {$\uparrow\downarrow$};
-  \node[anchor=west,inner sep=0pt] at (9,15.5) {\textbf{Schedule} {\color{promptgray}$\cdot$ next meet, entries due, .ics}};
-  \node[route] at (115,15.5) {Schedule $\rightarrow$};
-  \node[blk,minimum width=114mm,minimum height=7mm] (b6) at (3,11) {};
+  \node[anchor=west,inner sep=0pt] at (9,15.5) {\textbf{Operations} {\color{promptgray}$\cdot$ money, equipment, travel}};
+  \node[route] at (115,15.5) {Operations $\rightarrow$};
+  \node[blk,minimum width=114mm,minimum height=7mm] (b7) at (3,11) {};
   \node[handle] at (4.5,7.5) {$\uparrow\downarrow$};
-  \node[anchor=west,inner sep=0pt] at (9,7.5) {\textbf{Operations} {\color{promptgray}$\cdot$ money, equipment, travel}};
-  \node[route] at (115,7.5) {Operations $\rightarrow$};
+  \node[anchor=west,inner sep=0pt] at (9,7.5) {\textbf{Volume} {\color{promptgray}$\cdot$ 7-day / 28-day volume, plan \& goals}};
+  \node[route] at (115,7.5) {Volume $\rightarrow$};
 \end{tikzpicture}
 \caption{The Team landing page, Rose-Hulman as the example. The Coaches block
 is shown expanded; the rest are collapsed rows that open their route. The
@@ -697,7 +756,7 @@ season as held in the data platform.}
 \begin{description}[leftmargin=0em,style=nextline,itemsep=3pt]
   \item[Identity (top, glanceable).] Name, gender, class, hometown, MileSplit and Athletic.net links, and PRs --- the public-roster feel the audit of the current Athlete page calls for.
   \item[Secondary.] Recent race results, recent training (a week-over-week mileage graph), attendance / training log, past and current injuries, upcoming registered events (date, name, event), training paces, and stated goals. Person-file material (dietary restrictions, class schedules, paperwork) stays populated further down; anything duplicated elsewhere (e.g.\ 1-on-1 notes) becomes a link, not a repeated widget.
-  \item[Advanced analytics (bottom).] The learned attribute models:
+  \item[Advanced analytics (bottom --- v2).] The learned attribute models, deferred to v2 while the data platform matures:
     \begin{itemize}
       \item \textbf{Hill Resilience} --- is the runner better on flat or hilly courses? Built from course-elevation learning, MileSplit course rankings, FloRatings A/B/C/D, TullyRunners speed ratings, joshm.dev's Crystal Springs Pace Factor, and the golf-slope-rating analog.
       \item \textbf{Weather Impact} --- how much adverse weather degrades this runner. The constraint: exact per-race time is needed, and getting it at scale from Athletic.net is not viable (see \S\ref{sec:platform}).
@@ -791,7 +850,7 @@ illustrative of the output format.}
 \label{fig:athletewire}
 \end{figure}
 
-\paragraph{Analytics that could be added.} Beyond hill resilience and weather
+\paragraph{Analytics that could be added (v2).} Beyond hill resilience and weather
 impact: a \textbf{race-prediction band} per upcoming meet from the baseline,
 course offset and forecast; \textbf{critical speed / D$'$} from track marks;
 \textbf{championship response} (does the athlete run above baseline at
